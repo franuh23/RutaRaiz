@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { Routes } from "react-router";
+import { Routes, Route } from "react-router";
 import './App.css'
 import PiePagina from './componentes/estructura/PiePagina.jsx';
 import Cabecera from './componentes/estructura/Cabecera.jsx';
@@ -9,12 +9,11 @@ function App() {
 
   return (
     <Fragment>
-      <Routes>
-        <Cabecera>
-          <Navegacion/>
-        </Cabecera>
-        <PiePagina/>
-      </Routes>
+      <Cabecera>
+        <Navegacion />
+      </Cabecera>
+      <Routes></Routes>
+      <PiePagina />
     </Fragment>
   );
 }
