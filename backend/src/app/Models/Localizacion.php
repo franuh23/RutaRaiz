@@ -17,7 +17,7 @@ class Localizacion extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'ruta_id'
+        'ruta_id',
         'nombre',
         'distancia_desde_inicio',
         'distancia_desde_fin',
