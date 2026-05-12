@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LocalizacionPost;
+use App\Http\Requests\LocalizacionPut;
 use App\Models\Localizacion;
+use App\Models\Ruta;
 use Illuminate\Http\Request;
 
 class LocalizacionController extends Controller
@@ -12,7 +15,8 @@ class LocalizacionController extends Controller
      */
     public function index()
     {
-        //
+        $localizaciones = Localizacion::with('ruta')->paginate(20);
+        return view('localizaciones.index' , compact('localizaciones'));
     }
 
     /**
@@ -20,15 +24,17 @@ class LocalizacionController extends Controller
      */
     public function create()
     {
-        //
+        $rutas = Ruta::where('activo', true)->get();
+        return view('localizaciones.create', compact('rutas'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(LocalizacionPost $request)
     {
-        //
+        Localizacion::create($request->validated());
+        return redirect()->route('localizaciones.index')->with('success', 'Localización creada correctamente.');
     }
 
     /**
@@ -36,7 +42,8 @@ class LocalizacionController extends Controller
      */
     public function show(Localizacion $localizacion)
     {
-        //
+        $localizacion->load(['ruta', 'alojamientos']);
+        return view('localizaciones.show', compact('localizacion'));
     }
 
     /**
@@ -44,15 +51,17 @@ class LocalizacionController extends Controller
      */
     public function edit(Localizacion $localizacion)
     {
-        //
+        $rutas = Ruta::where('activo', true)->get();
+        return view('localizaciones.edit', compact('localizacion', 'rutas'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Localizacion $localizacion)
+    public function update(LocalizacionPut $request, Localizacion $localizacion)
     {
-        //
+        $localizacion->update($request->validated());
+        return redirect()->route('localizaciones.show', $localizacion)->with('success', 'Localización actualizada correctamente.');
     }
 
     /**
@@ -60,6 +69,7 @@ class LocalizacionController extends Controller
      */
     public function destroy(Localizacion $localizacion)
     {
-        //
+        $localizacion->delete();
+        return redirect()->route('localizaciones.index')->with('success', 'Localización eliminada correctamente.');
     }
 }

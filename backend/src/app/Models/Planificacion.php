@@ -38,7 +38,7 @@ class Planificacion extends Model
     {
         return [
             'activo' => 'boolean',
-            'fecha_inicio' = 'date',
+            'fecha_inicio' => 'date',
             'km_dia' => 'decimal:2',
             'dias_totales' => 'integer',
         ];

@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\RutaController;
+use App\Http\Controllers\LocalizacionController;
+use App\Http\Controllers\AlojamientoController;
 
 // Rutas de autenticación (login/logout)
 Route::get('/login', function () {
@@ -36,12 +38,41 @@ Route::get('/', function () {
 
 // Rutas solo admin
 Route::middleware(['auth', 'admin'])->group(function () {
+
+    // Rutas de rutas
     Route::get('/rutas/create', [RutaController::class, 'create'])->name('rutas.create');
     Route::post('/rutas', [RutaController::class, 'store'])->name('rutas.store');
     Route::get('/rutas/{ruta}/edit', [RutaController::class, 'edit'])->name('rutas.edit');
     Route::put('/rutas/{ruta}', [RutaController::class, 'update'])->name('rutas.update');
     Route::delete('/rutas/{ruta}', [RutaController::class, 'destroy'])->name('rutas.destroy');
+
+    // Rutas de localizaciones
+    Route::get('/localizaciones/create', [LocalizacionController::class, 'create'])->name('localizaciones.create');
+    Route::post('/localizaciones', [LocalizacionController::class, 'store'])->name('localizaciones.store');
+    Route::get('/localizaciones/{localizacion}/edit', [LocalizacionController::class, 'edit'])->name('localizaciones.edit');
+    Route::put('/localizaciones/{localizacion}', [LocalizacionController::class, 'update'])->name('localizaciones.update');
+    Route::delete('/localizaciones/{localizacion}', [LocalizacionController::class, 'destroy'])->name('localizaciones.destroy');
+
+    // Rutas de alojamientos
+    Route::get('/alojamientos/create', [AlojamientoController::class, 'create'])->name('alojamientos.create');
+    Route::post('/alojamientos', [AlojamientoController::class, 'store'])->name('alojamientos.store');
+    Route::get('/alojamientos/{alojamiento}/edit', [AlojamientoController::class, 'edit'])->name('alojamientos.edit');
+    Route::put('/alojamientos/{alojamiento}', [AlojamientoController::class, 'update'])->name('alojamientos.update');
+    Route::delete('/alojamientos/{alojamiento}', [AlojamientoController::class, 'destroy'])->name('alojamientos.destroy');
 });
 
-Route::get('/rutas', [RutaController::class, 'index'])->name('rutas.index');
-Route::get('/rutas/{ruta}', [RutaController::class, 'show'])->name('rutas.show');
+// *** Rutas públicas con parámetros ***
+
+    // Rutas
+    Route::get('/rutas', [RutaController::class, 'index'])->name('rutas.index');
+    Route::get('/rutas/{ruta}', [RutaController::class, 'show'])->name('rutas.show');
+
+    // Localizaciones
+    Route::get('/localizaciones', [LocalizacionController::class, 'index'])->name('localizaciones.index');
+    Route::get('/localizaciones/{localizacion}', [LocalizacionController::class, 'show'])->name('localizaciones.show');
+
+    // Alojamientos
+    Route::get('/alojamientos', [AlojamientoController::class, 'index'])->name('alojamientos.index');
+    Route::get('/alojamientos/{alojamiento}', [AlojamientoController::class, 'show'])->name('alojamientos.show');
+
+// *** Rutas públicas con parámetros ***

@@ -21,6 +21,8 @@
     <nav>
         <a href="{{ route('home') }}">Inicio</a>
         <a href="{{ route('rutas.index') }}">Rutas</a>
+        <a href="{{ route('localizaciones.index') }}">Localizaciones</a>
+        <a href="{{ route('alojamientos.index') }}">Alojamientos</a>
 
         @auth
             @if(auth()->user()->rol === 'admin')
