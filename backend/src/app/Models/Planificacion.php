@@ -45,32 +45,32 @@ class Planificacion extends Model
     }
 
     // Relación, pertenece a un usuario
-    public function usuario()
-    {
+    public function usuario() {
         return $this->belongsTo(Usuario::class);
     }
 
     // Relación, pertenece a una ruta
-    public function ruta()
-    {
+    public function ruta() {
         return $this->belongsTo(Ruta::class);
     }
 
     // Relación, pertenece a una localización (inicio)
-    public function localizacionInicio()
-    {
+    public function localizacionInicio() {
         return $this->belongsTo(Localizacion::class, 'localizacion_inicio_id');
     }
 
     // Relación, pertenece a una localización (fin)
-    public function localizacionFin()
-    {
+    public function localizacionFin() {
         return $this->belongsTo(Localizacion::class, 'localizacion_fin_id');
     }
 
     // Relación, tiene muchos comentarios
-    public function comentarios()
-    {
+    public function comentarios() {
         return $this->hasMany(ComentarioPlanificacion::class);
+    }
+
+    // Relación, tiene muchas etapas
+    public function etapas() {
+        return $this->hasMany(Etapa::class);
     }
 }

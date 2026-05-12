@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\RutaController;
 use App\Http\Controllers\LocalizacionController;
 use App\Http\Controllers\AlojamientoController;
+use App\Http\Controllers\PlanificacionController;
 
 // Rutas de autenticación (login/logout)
 Route::get('/login', function () {
@@ -36,6 +37,17 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+// Rutas para usuarios logueados (planificaciones)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/planificaciones', [PlanificacionController::class, 'index'])->name('planificaciones.index');
+    Route::get('/planificaciones/create', [PlanificacionController::class, 'create'])->name('planificaciones.create');
+    Route::post('/planificaciones', [PlanificacionController::class, 'store'])->name('planificaciones.store');
+    Route::get('/planificaciones/{planificacion}', [PlanificacionController::class, 'show'])->name('planificaciones.show');
+    Route::get('/planificaciones/{planificacion}/edit', [PlanificacionController::class, 'edit'])->name('planificaciones.edit');
+    Route::put('/planificaciones/{planificacion}', [PlanificacionController::class, 'update'])->name('planificaciones.update');
+    Route::delete('/planificaciones/{planificacion}', [PlanificacionController::class, 'destroy'])->name('planificaciones.destroy');
+});
+
 // Rutas solo admin
 Route::middleware(['auth', 'admin'])->group(function () {
 
@@ -59,20 +71,21 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/alojamientos/{alojamiento}/edit', [AlojamientoController::class, 'edit'])->name('alojamientos.edit');
     Route::put('/alojamientos/{alojamiento}', [AlojamientoController::class, 'update'])->name('alojamientos.update');
     Route::delete('/alojamientos/{alojamiento}', [AlojamientoController::class, 'destroy'])->name('alojamientos.destroy');
+
 });
 
 // *** Rutas públicas con parámetros ***
 
-    // Rutas
-    Route::get('/rutas', [RutaController::class, 'index'])->name('rutas.index');
-    Route::get('/rutas/{ruta}', [RutaController::class, 'show'])->name('rutas.show');
+// Rutas
+Route::get('/rutas', [RutaController::class, 'index'])->name('rutas.index');
+Route::get('/rutas/{ruta}', [RutaController::class, 'show'])->name('rutas.show');
 
-    // Localizaciones
-    Route::get('/localizaciones', [LocalizacionController::class, 'index'])->name('localizaciones.index');
-    Route::get('/localizaciones/{localizacion}', [LocalizacionController::class, 'show'])->name('localizaciones.show');
+// Localizaciones
+Route::get('/localizaciones', [LocalizacionController::class, 'index'])->name('localizaciones.index');
+Route::get('/localizaciones/{localizacion}', [LocalizacionController::class, 'show'])->name('localizaciones.show');
 
-    // Alojamientos
-    Route::get('/alojamientos', [AlojamientoController::class, 'index'])->name('alojamientos.index');
-    Route::get('/alojamientos/{alojamiento}', [AlojamientoController::class, 'show'])->name('alojamientos.show');
+// Alojamientos
+Route::get('/alojamientos', [AlojamientoController::class, 'index'])->name('alojamientos.index');
+Route::get('/alojamientos/{alojamiento}', [AlojamientoController::class, 'show'])->name('alojamientos.show');
 
 // *** Rutas públicas con parámetros ***

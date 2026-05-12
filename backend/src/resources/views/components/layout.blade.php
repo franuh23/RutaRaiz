@@ -23,6 +23,7 @@
         <a href="{{ route('rutas.index') }}">Rutas</a>
         <a href="{{ route('localizaciones.index') }}">Localizaciones</a>
         <a href="{{ route('alojamientos.index') }}">Alojamientos</a>
+        <a href="{{ route('planificaciones.index') }}">Mis Planificaciones</a>
 
         @auth
             @if(auth()->user()->rol === 'admin')
