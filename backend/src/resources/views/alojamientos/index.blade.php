@@ -26,7 +26,7 @@
                     <td>{{ $alojamiento->id }}</td>
                     <td>
                         @if($alojamiento->imagen)
-                            <img src="{{ Storage::url($alojamiento->imagen) }}" alt="{{ $alojamiento->nombre }}" style="width: 50px; height: 50px; object-fit: cover;">
+                            <img src="{{ $alojamiento->imagen }}" alt="{{ $alojamiento->nombre }}" style="width: 50px; height: 50px; object-fit: cover;">
                         @else
                             Sin imagen
                         @endif

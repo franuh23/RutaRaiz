@@ -30,7 +30,7 @@ class AlojamientoPut extends FormRequest
             'enlace' => 'nullable|max:255|url',
             'telefono' => 'nullable|max:20',
             'email' => 'nullable|email|max:100',
-            'imagen' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'imagen' => 'nullable|string|max:1000',
             'activo' => 'boolean',
         ];
     }
@@ -49,9 +49,6 @@ class AlojamientoPut extends FormRequest
             'tipo.in' => 'El tipo debe ser: hostal, hotel, albergue, casa_rural o camping.',
             'enlace.url' => 'El enlace debe ser una URL válida.',
             'email.email' => 'El email debe ser válido.',
-            'imagen.image' => 'El archivo debe ser una imagen.',
-            'imagen.mimes' => 'Formato permitido: jpg, jpeg, png.',
-            'imagen.max' => 'La imagen no puede superar los 2MB.',
         ];
     }
 }

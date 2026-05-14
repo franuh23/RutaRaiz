@@ -29,7 +29,7 @@ class RutaPost extends FormRequest
             'inicio' => 'required|max:100',
             'fin' => 'required|max:100',
             'kilometros' => 'required|numeric|min:0',
-            'imagen' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'imagen' => 'nullable|string|max:1000',
         ];
     }
 
@@ -50,9 +50,6 @@ class RutaPost extends FormRequest
             'kilometros.required' => 'Los kilómetros son obligatorios.',
             'kilometros.numeric' => 'Los kilómetros deben ser un número.',
             'kilometros.min' => 'Los kilómetros no pueden ser negativos.',
-            'imagen.image' => 'El archivo debe ser una imagen.',
-            'imagen.mimes' => 'Formato permitido: jpg, jpeg, png.',
-            'imagen.max' => 'La imagen no puede superar los 2MB.',
         ];
     }
 }

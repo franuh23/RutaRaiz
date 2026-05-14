@@ -21,9 +21,7 @@
                 <td>{{ $ruta->id }}</td>
                 <td>
                     @if($ruta->imagen)
-                        <img src="{{ Storage::url($ruta->imagen) }}" alt="{{ $ruta->nombre }}">
-                    @else
-                        Sin imagen
+                        <img src="{{ $ruta->imagen }}" alt="{{ $ruta->nombre }}" style="max-width: 100px;">
                     @endif
                 </td>
                 <td>{{ $ruta->nombre }}</td>

@@ -57,8 +57,8 @@
         </div>
 
         <div>
-            <label>Imagen:</label>
-            <input type="file" name="imagen" accept="image/*">
+            <label>URL de la imagen:</label>
+            <input type="text" name="imagen" placeholder="https://ejemplo.com/imagen.jpg" value="{{ old('imagen') }}">
         </div>
 
         <div>

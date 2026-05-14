@@ -5,7 +5,7 @@
     <h1>{{ $ruta->nombre }}</h1>
 
     @if($ruta->imagen)
-        <img src="{{ Storage::url($ruta->imagen) }}" alt="{{ $ruta->nombre }}" style="max-width: 400px;">
+        <img src="{{ $ruta->imagen }}" alt="{{ $ruta->nombre }}" style="max-width: 400px;">
     @endif
 
     <p><strong>Descripción:</strong> {{ $ruta->descripcion ?? 'Sin descripción' }}</p>

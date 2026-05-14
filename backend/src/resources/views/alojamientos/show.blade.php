@@ -5,13 +5,14 @@
     <h1>{{ $alojamiento->nombre }}</h1>
 
     @if($alojamiento->imagen)
-        <img src="{{ Storage::url($alojamiento->imagen) }}" alt="{{ $alojamiento->nombre }}" style="max-width: 300px;">
+        <img src="{{ $alojamiento->imagen }}" alt="{{ $alojamiento->nombre }}" style="max-width: 300px;">
     @endif
 
-    <p><strong>Localización:</strong> {{ $alojamiento->localizacion->nombre }} ({{ $alojamiento->localizacion->ruta->nombre }})</p>
+    <p><strong>Localización:</strong> {{ $alojamiento->localizacion->nombre }}
+        ({{ $alojamiento->localizacion->ruta->nombre }})</p>
     <p><strong>Dirección:</strong> {{ $alojamiento->direccion ?? 'No especificada' }}</p>
     <p><strong>Tipo:</strong> {{ $alojamiento->tipo }}</p>
-    <p><strong>Enlace web:</strong> 
+    <p><strong>Enlace web:</strong>
         @if($alojamiento->enlace)
             <a href="{{ $alojamiento->enlace }}" target="_blank">{{ $alojamiento->enlace }}</a>
         @else

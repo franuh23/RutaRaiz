@@ -34,12 +34,6 @@ class AlojamientoController extends Controller
      */
     public function store(AlojamientoPost $request)
     {
-        $imagenPath = null;
-
-        if ($request->hasFile('imagen')) {
-            $imagenPath = $request->file('imagen')->store('alojamientos', 'public');
-        }
-
         Alojamiento::create([
             'localizacion_id' => $request->localizacion_id,
             'nombre' => $request->nombre,
@@ -48,7 +42,7 @@ class AlojamientoController extends Controller
             'enlace' => $request->enlace,
             'telefono' => $request->telefono,
             'email' => $request->email,
-            'imagen' => $imagenPath,
+            'imagen' => $request->imagen,
             'activo' => $request->activo ?? true,
         ]);
 
@@ -78,16 +72,17 @@ class AlojamientoController extends Controller
      */
     public function update(AlojamientoPut $request, Alojamiento $alojamiento)
     {
-        $data = $request->except(['imagen']);
-
-        if ($request->hasFile('imagen')) {
-            if ($alojamiento->imagen && Storage::disk('public')->exists($alojamiento->imagen)) {
-                Storage::disk('public')->delete($alojamiento->imagen);
-            }
-            $data['imagen'] = $request->file('imagen')->store('alojamientos', 'public');
-        }
-
-        $alojamiento->update($data);
+        $alojamiento->update([
+            'localizacion_id' => $request->localizacion_id,
+            'nombre' => $request->nombre,
+            'direccion' => $request->direccion,
+            'tipo' => $request->tipo,
+            'enlace' => $request->enlace,
+            'telefono' => $request->telefono,
+            'email' => $request->email,
+            'imagen' => $request->imagen ?? $alojamiento->imagen,
+            'activo' => $request->activo ?? true,
+        ]);
 
         return redirect()->route('alojamientos.show', $alojamiento)->with('success', 'Alojamiento actualizado correctamente.');
     }
@@ -97,11 +92,7 @@ class AlojamientoController extends Controller
      */
     public function destroy(Alojamiento $alojamiento)
     {
-        if ($alojamiento->imagen && Storage::disk('public')->exists($alojamiento->imagen)) {
-            Storage::disk('public')->delete($alojamiento->imagen);
-        }
         $alojamiento->delete();
-
         return redirect()->route('alojamientos.index')->with('success', 'Alojamiento eliminado correctamente.');
     }
 }

@@ -32,17 +32,6 @@ class RutaController extends Controller
      */
     public function store(RutaPost $request)
     {
-        $imagenPath = null;
-
-        if ($request->hasFile('imagen')) {
-            $imagenPath = $request->file('imagen')->store('rutas/imagenes', 'public');
-
-            // solo para debug
-            $archivo = $request->file('imagen');
-            dump($archivo->getRealPath());
-            dump(Storage::path($imagenPath));
-        }
-
         Ruta::create([
             'nombre' => $request->nombre,
             'descripcion' => $request->descripcion,
@@ -50,7 +39,7 @@ class RutaController extends Controller
             'inicio' => $request->inicio,
             'fin' => $request->fin,
             'kilometros' => $request->kilometros,
-            'imagen' => $imagenPath,
+            'imagen' => $request->imagen,
         ]);
 
         return redirect()->route('rutas.index')->with('success', 'Ruta creada correctamente.');
@@ -78,20 +67,16 @@ class RutaController extends Controller
      */
     public function update(RutaPut $request, Ruta $ruta)
     {
-        $data = $request->except(['imagen']);
+        $ruta->update([
+            'nombre' => $request->nombre,
+            'descripcion' => $request->descripcion,
+            'dificultad' => $request->dificultad,
+            'inicio' => $request->inicio,
+            'fin' => $request->fin,
+            'kilometros' => $request->kilometros,
+            'imagen' => $request->imagen ?? $ruta->imagen,
+        ]);
 
-        // Solo si se sube nueva imagen
-        if ($request->hasFile('imagen')) {
-
-            // Borrar imagen anterior si existe
-            if ($ruta->imagen && Storage::disk('public')->exists($ruta->imagen)) {
-                Storage::disk('public')->delete($ruta->imagen);
-            }
-
-            $data['imagen'] = $request->file('imagen')->store('rutas/imagenes', 'public');
-        }
-
-        $ruta->update($data);
         return redirect()->route('rutas.show', $ruta)->with('success', 'Ruta actualizada correctamente.');
     }
 

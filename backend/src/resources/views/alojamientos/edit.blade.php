@@ -34,15 +34,18 @@
             <select name="tipo" required>
                 <option value="hostal" {{ old('tipo', $alojamiento->tipo) == 'hostal' ? 'selected' : '' }}>Hostal</option>
                 <option value="hotel" {{ old('tipo', $alojamiento->tipo) == 'hotel' ? 'selected' : '' }}>Hotel</option>
-                <option value="albergue" {{ old('tipo', $alojamiento->tipo) == 'albergue' ? 'selected' : '' }}>Albergue</option>
-                <option value="casa_rural" {{ old('tipo', $alojamiento->tipo) == 'casa_rural' ? 'selected' : '' }}>Casa Rural</option>
+                <option value="albergue" {{ old('tipo', $alojamiento->tipo) == 'albergue' ? 'selected' : '' }}>Albergue
+                </option>
+                <option value="casa_rural" {{ old('tipo', $alojamiento->tipo) == 'casa_rural' ? 'selected' : '' }}>Casa Rural
+                </option>
                 <option value="camping" {{ old('tipo', $alojamiento->tipo) == 'camping' ? 'selected' : '' }}>Camping</option>
             </select>
         </div>
 
         <div>
             <label>Enlace web:</label>
-            <input type="url" name="enlace" maxlength="255" value="{{ old('enlace', $alojamiento->enlace) }}" placeholder="https://...">
+            <input type="url" name="enlace" maxlength="255" value="{{ old('enlace', $alojamiento->enlace) }}"
+                placeholder="https://...">
         </div>
 
         <div>
@@ -56,17 +59,18 @@
         </div>
 
         <div>
-            <label>Imagen actual:</label>
+            <label>URL de la imagen actual:</label>
             @if($alojamiento->imagen)
-                <img src="{{ Storage::url($alojamiento->imagen) }}" alt="{{ $alojamiento->nombre }}" style="max-width: 150px;">
+                <img src="{{ $alojamiento->imagen }}" alt="{{ $alojamiento->nombre }}" style="max-width: 150px;">
             @else
                 <p>Sin imagen</p>
             @endif
         </div>
 
         <div>
-            <label>Cambiar imagen:</label>
-            <input type="file" name="imagen" accept="image/*">
+            <label>Cambiar URL de la imagen:</label>
+            <input type="text" name="imagen" placeholder="https://ejemplo.com/imagen.jpg"
+                value="{{ old('imagen', $alojamiento->imagen) }}">
         </div>
 
         <div>

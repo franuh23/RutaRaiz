@@ -43,12 +43,9 @@
         </div>
 
         <div>
-            <label>Imagen actual:</label>
-            @if($ruta->imagen)
-                <img src="{{ Storage::url($ruta->imagen) }}" alt="{{ $ruta->nombre }}">
-            @else
-                <p>Sin imagen</p>
-            @endif
+            <label>URL de la imagen:</label>
+            <input type="text" name="imagen" placeholder="https://ejemplo.com/imagen.jpg"
+                value="{{ old('imagen', $ruta->imagen) }}">
         </div>
 
         <div>
