@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Alojamiento;
 use App\Models\Localizacion;
+use App\Models\ComentarioAlojamiento;
+use App\Http\Requests\ComentarioAlojamientoPost;
 use App\Http\Requests\AlojamientoPost;
 use App\Http\Requests\AlojamientoPut;
 use Illuminate\Support\Facades\Storage;
@@ -94,5 +96,22 @@ class AlojamientoController extends Controller
     {
         $alojamiento->delete();
         return redirect()->route('alojamientos.index')->with('success', 'Alojamiento eliminado correctamente.');
+    }
+
+    /**
+     * Store a new comment for an accommodation.
+     */
+    public function storeComentario(ComentarioAlojamientoPost $request, Alojamiento $alojamiento)
+    {
+        // Crear el comentario
+        ComentarioAlojamiento::create([
+            'usuario_id' => auth()->id(),
+            'alojamiento_id' => $alojamiento->id,
+            'texto' => $request->texto,
+            'activo' => true,
+        ]);
+
+        // Redirigir de vuelta a la página del alojamiento
+        return redirect()->route('alojamientos.show', $alojamiento)->with('success', 'Comentario añadido.');
     }
 }

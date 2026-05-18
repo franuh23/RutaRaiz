@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RutaPost;
 use App\Http\Requests\RutaPut;
+use App\Http\Requests\ComentarioRutaPost;
 use App\Models\Ruta;
+use App\Models\ComentarioRuta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -92,5 +94,22 @@ class RutaController extends Controller
 
         $ruta->delete();
         return redirect()->route('rutas.index')->with('success', 'Ruta eliminada correctamente.');
+    }
+
+    /**
+     * Store a new comment for a route.
+     */
+    public function storeComentario(ComentarioRutaPost $request, Ruta $ruta)
+    {
+        // Crear el comentario
+        ComentarioRuta::create([
+            'usuario_id' => auth()->id(),
+            'ruta_id' => $ruta->id,
+            'texto' => $request->texto,
+            'activo' => true,
+        ]);
+
+        // Redirigir de vuelta a la página de la ruta
+        return redirect()->route('rutas.show', $ruta)->with('success', 'Comentario añadido.');
     }
 }

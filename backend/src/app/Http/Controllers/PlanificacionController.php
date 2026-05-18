@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Planificacion;
 use App\Models\Ruta;
 use App\Models\Localizacion;
+use App\Models\ComentarioPlanificacion;
+use App\Http\Requests\ComentarioPlanificacionPost;
 use App\Http\Requests\PlanificacionPost;
 use App\Http\Requests\PlanificacionPut;
 use Illuminate\Support\Facades\Auth;
@@ -157,5 +159,22 @@ class PlanificacionController extends Controller
                 'distancia' => $kmAcumuladosDia,
             ]);
         }
+    }
+
+    /**
+     * Store a new comment for a planification.
+     */
+    public function storeComentario(ComentarioPlanificacionPost $request, Planificacion $planificacion)
+    {
+        // Crear el comentario
+        ComentarioPlanificacion::create([
+            'usuario_id' => auth()->id(),
+            'planificacion_id' => $planificacion->id,
+            'texto' => $request->texto,
+            'activo' => true,
+        ]);
+
+        // Redirigir de vuelta a la página de la planificación
+        return redirect()->route('planificaciones.show', $planificacion)->with('success', 'Comentario añadido.');
     }
 }

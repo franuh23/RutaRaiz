@@ -88,4 +88,16 @@ Route::get('/localizaciones/{localizacion}', [LocalizacionController::class, 'sh
 Route::get('/alojamientos', [AlojamientoController::class, 'index'])->name('alojamientos.index');
 Route::get('/alojamientos/{alojamiento}', [AlojamientoController::class, 'show'])->name('alojamientos.show');
 
+// Comentarios en rutas
+Route::post('/rutas/{ruta}/comentarios', [RutaController::class, 'storeComentario'])->name('rutas.comentarios.store');
+
+// Comentarios en localizaciones
+Route::post('/localizaciones/{localizacion}/comentarios', [LocalizacionController::class, 'storeComentario'])->name('localizaciones.comentarios.store');
+
+// Comentarios en alojamientos
+Route::post('/alojamientos/{alojamiento}/comentarios', [AlojamientoController::class, 'storeComentario'])->name('alojamientos.comentarios.store');
+
+// Comentarios en planificaciones
+Route::post('/planificaciones/{planificacion}/comentarios', [PlanificacionController::class, 'storeComentario'])->name('planificaciones.comentarios.store');
+
 // *** Rutas públicas con parámetros ***

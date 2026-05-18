@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LocalizacionPost;
 use App\Http\Requests\LocalizacionPut;
+use App\Http\Requests\ComentarioLocalizacionPost;
 use App\Models\Localizacion;
+use App\Models\ComentarioLocalizacion;
 use App\Models\Ruta;
 use Illuminate\Http\Request;
 
@@ -71,5 +73,22 @@ class LocalizacionController extends Controller
     {
         $localizacion->delete();
         return redirect()->route('localizaciones.index')->with('success', 'Localización eliminada correctamente.');
+    }
+
+    /**
+     * Store a new comment for a localization.
+     */
+    public function storeComentario(ComentarioLocalizacionPost $request, Localizacion $localizacion)
+    {
+        // Crear el comentario
+        ComentarioLocalizacion::create([
+            'usuario_id' => auth()->id(),
+            'localizacion_id' => $localizacion->id,
+            'texto' => $request->texto,
+            'activo' => true,
+        ]);
+
+        // Redirigir de vuelta a la página de la localización
+        return redirect()->route('localizaciones.show', $localizacion)->with('success', 'Comentario añadido.');
     }
 }
