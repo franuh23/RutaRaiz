@@ -1,13 +1,9 @@
 :80 {
-  root * /var/www/public
-  encode gzip zstd
+    root * /var/www/public
+    php_fastcgi php:9000
+    file_server
 
-  php_fastcgi php:9000
-  file_server
-
-  # Opcional: seguridad básica
-  # header {
-  #   X-Content-Type-Options nosniff
-  #   X-Frame-Options DENY
-  # }
+    route /api/* {
+        php_fastcgi php:9000
+    }
 }

@@ -6,6 +6,12 @@ use App\Http\Controllers\Api\RutaController;
 use App\Http\Controllers\Api\LocalizacionController;
 use App\Http\Controllers\Api\AlojamientoController;
 use App\Http\Controllers\Api\PlanificacionController;
+use App\Http\Controllers\Api\TestController;
+
+// Planificación pública
+Route::get('/rutas/planificar', [RutaController::class, 'planificar']);
+
+Route::get('/test', [TestController::class, 'test']);
 
 // Rutas públicas
 Route::apiResource('rutas', RutaController::class)->only(['index', 'show']);
