@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Paleta principal */
+  --verde-bosque:   #1e3a0f;
+  --verde-hoja:     #2d5a1b;
+  --verde-medio:    #3d7a25;
+  --verde-claro:    #5a9e38;
+  --verde-suave:    #c8e6a0;
+  --tierra:         #7a3b10;
+  --tierra-clara:   #a0522d;
+  --oro:            #e8c547;
+  --oro-suave:      #f5e090;
+  --crema:          #f7f4ee;
+  --crema-oscura:   #ede8df;
+  --piedra:         #8a9280;
+  --oscuro:         #1a1f18;
+
+  /* Tipografía */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  /* Espaciado */
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-xl:  32px;
+  --radius-full: 9999px;
+
+  /* Sombras */
+  --shadow-sm:  0 2px 8px rgba(30,58,15,0.08);
+  --shadow-md:  0 8px 24px rgba(30,58,15,0.12);
+  --shadow-lg:  0 16px 48px rgba(30,58,15,0.18);
+
+  /* Transiciones */
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--crema);
+  color: var(--oscuro);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: 1.2;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  outline: none;
+}

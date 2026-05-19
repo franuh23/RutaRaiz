@@ -1,0 +1,105 @@
+.card {
+  background: white;
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  cursor: pointer;
+  background: var(--crema-oscura);
+  transition: var(--transition);
+}
+
+.header:hover {
+  background: var(--oro-suave);
+}
+
+.nombre {
+  font-weight: 600;
+  font-size: 1.1rem;
+  flex: 1;
+}
+
+.distancia {
+  font-size: 0.8rem;
+  color: var(--piedra);
+}
+
+.icono {
+  font-size: 0.7rem;
+  color: var(--verde-medio);
+}
+
+.descripcion {
+  padding: 0.75rem 1rem;
+  background: white;
+  font-size: 0.9rem;
+  color: #555;
+  border-bottom: 1px solid #eee;
+}
+
+.alojamientos {
+  padding: 0.75rem 1rem;
+  background: white;
+}
+
+.alojamientos h4 {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: var(--verde-hoja);
+}
+
+.alojamientoCard {
+  background: var(--crema);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.alojamientoHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.alojamientoHeader:hover {
+  background: var(--oro-suave);
+}
+
+.alojamientoNombre {
+  font-weight: 500;
+  flex: 1;
+}
+
+.alojamientoTipo {
+  font-size: 0.7rem;
+  color: var(--piedra);
+  background: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.detalles {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  color: #555;
+  border-top: 1px solid #eee;
+}
+
+.detalles p {
+  margin: 0.25rem 0;
+}
+
+.detalles a {
+  color: var(--verde-medio);
+  text-decoration: underline;
+}
