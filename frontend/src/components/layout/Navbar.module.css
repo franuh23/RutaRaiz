@@ -136,3 +136,9 @@
   .navActions { display: none; }
   .hamburger { display: flex; }
 }
+
+.userNick {
+  color: var(--oro);
+  font-weight: 600;
+  font-size: 0.88rem;
+}

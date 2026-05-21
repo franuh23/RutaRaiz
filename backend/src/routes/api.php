@@ -25,7 +25,7 @@ Route::apiResource('alojamientos', AlojamientoController::class)->only(['index',
 // Rutas protegidas (requieren autenticación)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::apiResource('planificaciones', PlanificacionController::class)->only(['index', 'show']);
+    Route::apiResource('planificaciones', PlanificacionController::class)->only(['index', 'show', 'store', 'destroy']);
 
     Route::get('/usuario', function (Request $request) {
         return $request->user();

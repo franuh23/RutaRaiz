@@ -111,3 +111,56 @@
   border-radius: var(--radius-md);
   margin-bottom: 1rem;
 }
+
+.btnGuardar {
+  background: var(--tierra);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  width: 100%;
+  transition: var(--transition);
+}
+
+.btnGuardar:hover:not(:disabled) {
+  background: var(--tierra-clara);
+  transform: translateY(-2px);
+}
+
+.btnGuardar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.exito {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btnVerPlanificaciones {
+  background: #2e7d32;
+  color: white;
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btnVerPlanificaciones:hover {
+  background: var(--verde-hoja);
+}
