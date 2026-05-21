@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Container from '../components/layout/Container';
-import styles from './MisPlanificacionesPage.module.css';
+import PlanificacionCard from '../components/planificacion/PlanificacionCard';
 
 export default function MisPlanificacionesPage() {
   const { token, isAuthenticated, loading } = useAuth();
@@ -10,17 +10,14 @@ export default function MisPlanificacionesPage() {
   const [planificaciones, setPlanificaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // Si no está logueado, redirigir al login
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       navigate('/login');
     }
   }, [loading, isAuthenticated, navigate]);
 
-  // Cargar planificaciones del usuario
   useEffect(() => {
     if (!token) return;
-
     fetch('/api/planificaciones', {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -40,66 +37,63 @@ export default function MisPlanificacionesPage() {
 
   const handleEliminar = async (id) => {
     if (!confirm('¿Seguro que quieres eliminar esta planificación?')) return;
-
-    await fetch(`/api/planificaciones/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
-
-    setPlanificaciones(planificaciones.filter(p => p.id !== id));
+    try {
+      await fetch(`/api/planificaciones/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+      setPlanificaciones(planificaciones.filter(p => p.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  if (loading || cargando) return <Container><p>Cargando...</p></Container>;
+  if (loading || cargando) {
+    return (
+      <Container>
+        <div className="text-center py-5 text-muted">Cargando...</div>
+      </Container>
+    );
+  }
 
   return (
     <Container>
-      <div className={styles.header}>
-        <h1 className={styles.titulo}>Mis planificaciones</h1>
-        <button className={styles.btnNueva} onClick={() => navigate('/planificador')}>
+      <div className="d-flex justify-content-between align-items-center my-4 flex-wrap gap-3">
+        <h1 className="h2 m-0" style={{ color: 'var(--verde-bosque)', fontWeight: '700' }}>
+          Mis planificaciones
+        </h1>
+        <button 
+          className="btn text-white px-4 py-2" 
+          onClick={() => navigate('/planificador')}
+          style={{ background: 'var(--verde-bosque)', fontWeight: '600', borderRadius: 'var(--radius-md)' }}
+        >
           + Nueva planificación
         </button>
       </div>
 
       {planificaciones.length === 0 ? (
-        <div className={styles.vacio}>
-          <p>Todavía no tienes ninguna planificación guardada.</p>
-          <button className={styles.btnNueva} onClick={() => navigate('/planificador')}>
+        <div className="text-center py-5 border rounded bg-white shadow-sm my-4" style={{ borderRadius: 'var(--radius-lg)' }}>
+          <p className="text-muted mb-4">Todavía no tienes ninguna planificación guardada.</p>
+          <button 
+            className="btn text-white px-4 py-2" 
+            onClick={() => navigate('/planificador')}
+            style={{ background: 'var(--verde-bosque)', fontWeight: '600', borderRadius: 'var(--radius-md)' }}
+          >
             Crear mi primera ruta
           </button>
         </div>
       ) : (
-        <div className={styles.lista}>
+        <div className="mb-5">
           {planificaciones.map(p => (
-            <div key={p.id} className={styles.card}>
-              <div className={styles.cardInfo}>
-                <h3 className={styles.rutaNombre}>{p.ruta_nombre}</h3>
-                <div className={styles.meta}>
-                  <span>📅 Inicio: {p.fecha_inicio}</span>
-                  <span>👣 {p.km_dia} km/día</span>
-                  <span>🗓️ {p.dias_totales} días</span>
-                </div>
-                <div className={styles.meta}>
-                  <span>📍 {p.localizacion_inicio_nombre} → {p.localizacion_fin_nombre || 'Final de ruta'}</span>
-                </div>
-              </div>
-              <div className={styles.cardActions}>
-                <button
-                  className={styles.btnVer}
-                  onClick={() => navigate(`/mis-planificaciones/${p.id}`)}
-                >
-                  Ver etapas
-                </button>
-                <button
-                  className={styles.btnEliminar}
-                  onClick={() => handleEliminar(p.id)}
-                >
-                  Eliminar
-                </button>
-              </div>
-            </div>
+            <PlanificacionCard 
+              key={p.id} 
+              p={p} 
+              onVer={(id) => navigate(`/mis-planificaciones/${id}`)} 
+              onEliminar={handleEliminar} 
+            />
           ))}
         </div>
       )}

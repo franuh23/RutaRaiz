@@ -13,21 +13,42 @@ use App\Http\Controllers\Api\TestController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Planificación pública
+// Planificación de itinerarios automática (pública)
 Route::get('/rutas/planificar', [RutaController::class, 'planificar']);
 Route::get('/test', [TestController::class, 'test']);
 
-// Rutas públicas
-Route::apiResource('rutas', RutaController::class)->only(['index', 'show']);
-Route::apiResource('localizaciones', LocalizacionController::class)->only(['index', 'show']);
-Route::apiResource('alojamientos', AlojamientoController::class)->only(['index', 'show']);
+// Lectura pública de recursos de senderismo
+Route::get('/rutas', [RutaController::class, 'index']);
+Route::get('/rutas/{id}', [RutaController::class, 'show']);
 
-// Rutas protegidas (requieren autenticación)
+Route::get('/localizaciones', [LocalizacionController::class, 'index']);
+Route::get('/localizaciones/{id}', [LocalizacionController::class, 'show']);
+
+Route::get('/alojamientos', [AlojamientoController::class, 'index']);
+Route::get('/alojamientos/{id}', [AlojamientoController::class, 'show']);
+
+// Rutas protegidas (requieren token de portador Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Gestión de planificaciones del usuario
     Route::apiResource('planificaciones', PlanificacionController::class)->only(['index', 'show', 'store', 'destroy']);
 
+    // Retorno de datos de sesión activa
     Route::get('/usuario', function (Request $request) {
         return $request->user();
     });
+
+    // Escritura de recursos globales (Restringido en Frontend/Backend para rol 'admin')
+    Route::post('/rutas', [RutaController::class, 'store']);
+    Route::put('/rutas/{id}', [RutaController::class, 'update']);
+    Route::delete('/rutas/{id}', [RutaController::class, 'destroy']);
+
+    Route::post('/localizaciones', [LocalizacionController::class, 'store']);
+    Route::put('/localizaciones/{id}', [LocalizacionController::class, 'update']);
+    Route::delete('/localizaciones/{id}', [LocalizacionController::class, 'destroy']);
+
+    Route::post('/alojamientos', [AlojamientoController::class, 'store']);
+    Route::put('/alojamientos/{id}', [AlojamientoController::class, 'update']);
+    Route::delete('/alojamientos/{id}', [AlojamientoController::class, 'destroy']);
 });

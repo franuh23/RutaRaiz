@@ -1,10 +1,7 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Container from './Container';
-import Button from '../ui/Button';
-import { NAV_LINKS } from '../../data';
-import styles from './Navbar.module.css';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -17,90 +14,85 @@ export default function Navbar() {
   };
 
   return (
-    <header className={styles.header}>
+    <header className="navbar navbar-expand-md navbar-light bg-white shadow-sm py-3">
       <Container>
-        <nav className={styles.navbar}>
+        {/* Logo */}
+        <Link to="/" className="navbar-brand d-flex align-items-center fw-bold text-dark fs-4">
+          <span className="me-2">🎒</span>
+          <span>Ruta<span style={{ color: 'var(--verde-medio)' }}>Raíz</span></span>
+        </Link>
 
-          {/* Logo */}
-          <a href="/" className={styles.logo}>
-            <div className={styles.logoIcon}>
-              <span className={styles.logoEmoji}>🎒</span>
-              <span className={styles.logoBadge}>🐚</span>
-            </div>
-            <span className={styles.logoText}>
-              Ruta<span className={styles.logoAccent}>Raíz</span>
-            </span>
-          </a>
+        {/* Hamburger móvil */}
+        <button 
+          className="navbar-toggler border-0" 
+          type="button" 
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Menu"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
 
-          {/* Links escritorio */}
-          <div className={styles.navLinks}>
-            {NAV_LINKS.map((link) => (
-              <a key={link.href} href={link.href} className={styles.navLink}>
-                {link.label}
-              </a>
-            ))}
-          </div>
+        {/* Menú de navegación */}
+        <div className={`collapse navbar-collapse ${menuOpen ? 'show' : ''}`}>
+          <ul className="navbar-nav me-auto mb-2 mb-md-0 ms-md-4 gap-2">
+            <li className="nav-item">
+              <Link to="/rutas" className="nav-link fw-semibold text-secondary">Rutas</Link>
+            </li>
+            <li className="nav-item">
+              <Link to="/planificador" className="nav-link fw-semibold text-secondary">Planificador</Link>
+            </li>
+            {isAuthenticated && (
+              <li className="nav-item">
+                <Link to="/mis-planificaciones" className="nav-link fw-semibold text-secondary">
+                  Mis Planificaciones
+                </Link>
+              </li>
+            )}
+            {/* Enlace dinámico exclusivo para administradores */}
+            {isAuthenticated && user?.rol === 'admin' && (
+              <li className="nav-item">
+                <Link to="/admin" className="nav-link fw-bold text-danger">
+                  Panel Admin
+                </Link>
+              </li>
+            )}
+          </ul>
 
-          {/* Botones escritorio */}
-          <div className={styles.navActions}>
+          {/* Acciones de usuario */}
+          <div className="d-flex align-items-center gap-3">
             {isAuthenticated ? (
               <>
-                <span className={styles.userNick}>👋 {user?.nick}</span>
-                <Button variant="outline" size="sm" onClick={handleLogout}>
+                <span className="fw-bold text-dark small">
+                  👋 {user?.nick} <span className="badge bg-secondary ms-1 text-capitalize">{user?.rol}</span>
+                </span>
+                <button 
+                  className="btn btn-sm btn-outline-danger px-3 fw-bold" 
+                  onClick={handleLogout}
+                  style={{ borderRadius: 'var(--radius-md)' }}
+                >
                   Cerrar sesión
-                </Button>
+                </button>
               </>
             ) : (
               <>
-                <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
+                <button 
+                  className="btn btn-sm btn-outline-success px-3 fw-bold" 
+                  onClick={() => navigate('/login')}
+                  style={{ borderRadius: 'var(--radius-md)' }}
+                >
                   Iniciar sesión
-                </Button>
-                <Button variant="primary" size="sm" onClick={() => navigate('/register')}>
+                </button>
+                <button 
+                  className="btn btn-sm text-white px-3 fw-bold" 
+                  onClick={() => navigate('/register')}
+                  style={{ background: 'var(--verde-bosque)', borderRadius: 'var(--radius-md)' }}
+                >
                   Registrarse
-                </Button>
+                </button>
               </>
             )}
           </div>
-
-          {/* Hamburger móvil */}
-          <button
-            className={styles.hamburger}
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Abrir menú"
-          >
-            <span className={styles.bar} />
-            <span className={styles.bar} />
-            <span className={styles.bar} />
-          </button>
-        </nav>
-
-        {/* Menú móvil desplegable */}
-        {menuOpen && (
-          <div className={styles.mobileMenu}>
-            {NAV_LINKS.map((link) => (
-              <a key={link.href} href={link.href} className={styles.mobileLink}>
-                {link.label}
-              </a>
-            ))}
-            <div className={styles.mobileActions}>
-              {isAuthenticated ? (
-                <Button variant="outline" size="sm" onClick={handleLogout}>
-                  Cerrar sesión
-                </Button>
-              ) : (
-                <>
-                  <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
-                    Iniciar sesión
-                  </Button>
-                  <Button variant="primary" size="sm" onClick={() => navigate('/register')}>
-                    Registrarse
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
+        </div>
       </Container>
     </header>
   );

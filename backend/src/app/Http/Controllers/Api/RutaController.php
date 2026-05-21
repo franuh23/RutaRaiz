@@ -7,6 +7,7 @@ use App\Models\Ruta;
 use App\Http\Resources\RutaResource;
 use App\Http\Requests\PlanificarRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RutaController extends Controller
 {
@@ -24,7 +25,25 @@ class RutaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if (Auth::user()->rol !== 'admin') {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'descripcion' => 'required|string',
+            'distancia_total' => 'required|numeric|min:0',
+            'tiempo_estimado' => 'required|string',
+            'dificultad' => 'required|string|max:50',
+            'imagen' => 'nullable|string',
+        ]);
+
+        $ruta = Ruta::create($validated);
+
+        return response()->json([
+            'message' => 'Ruta creada correctamente',
+            'data' => new RutaResource($ruta)
+        ], 201);
     }
 
     /**
@@ -41,7 +60,27 @@ class RutaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        if (Auth::user()->rol !== 'admin') {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $ruta = Ruta::findOrFail($id);
+
+        $validated = $request->validate([
+            'nombre' => 'sometimes|required|string|max:255',
+            'descripcion' => 'sometimes|required|string',
+            'distancia_total' => 'sometimes|required|numeric|min:0',
+            'tiempo_estimado' => 'sometimes|required|string',
+            'dificultad' => 'sometimes|required|string|max:50',
+            'imagen' => 'nullable|string',
+        ]);
+
+        $ruta->update($validated);
+
+        return response()->json([
+            'message' => 'Ruta actualizada correctamente',
+            'data' => new RutaResource($ruta)
+        ]);
     }
 
     /**
@@ -49,7 +88,16 @@ class RutaController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        if (Auth::user()->rol !== 'admin') {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $ruta = Ruta::findOrFail($id);
+        $ruta->delete();
+
+        return response()->json([
+            'message' => 'Ruta eliminada correctamente'
+        ]);
     }
 
     /**

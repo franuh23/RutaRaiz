@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Localizacion;
 use App\Http\Resources\LocalizacionResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LocalizacionController extends Controller
 {
@@ -23,7 +24,24 @@ class LocalizacionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if (Auth::user()->rol !== 'admin') {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $validated = $request->validate([
+            'ruta_id' => 'required|exists:rutas,id',
+            'nombre' => 'required|string|max:255',
+            'descripcion' => 'required|string',
+            'distancia_desde_inicio' => 'required|numeric|min:0',
+            'imagen' => 'nullable|string',
+        ]);
+
+        $localizacion = Localizacion::create($validated);
+
+        return response()->json([
+            'message' => 'Localización creada correctamente',
+            'data' => new LocalizacionResource($localizacion)
+        ], 201);
     }
 
     /**
@@ -40,7 +58,26 @@ class LocalizacionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        if (Auth::user()->rol !== 'admin') {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $localizacion = Localizacion::findOrFail($id);
+
+        $validated = $request->validate([
+            'ruta_id' => 'sometimes|required|exists:rutas,id',
+            'nombre' => 'sometimes|required|string|max:255',
+            'descripcion' => 'sometimes|required|string',
+            'distancia_desde_inicio' => 'sometimes|required|numeric|min:0',
+            'imagen' => 'nullable|string',
+        ]);
+
+        $localizacion->update($validated);
+
+        return response()->json([
+            'message' => 'Localización actualizada correctamente',
+            'data' => new LocalizacionResource($localizacion)
+        ]);
     }
 
     /**
@@ -48,6 +85,15 @@ class LocalizacionController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        if (Auth::user()->rol !== 'admin') {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $localizacion = Localizacion::findOrFail($id);
+        $localizacion->delete();
+
+        return response()->json([
+            'message' => 'Localización eliminada correctamente'
+        ]);
     }
 }
