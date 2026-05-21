@@ -14,86 +14,70 @@ export default function Navbar() {
   };
 
   return (
-    <header className="navbar navbar-expand-md navbar-light bg-white shadow-sm py-3">
-      <Container>
-        {/* Logo */}
-        <Link to="/" className="navbar-brand d-flex align-items-center fw-bold text-dark fs-4">
-          <span className="me-2">🎒</span>
-          <span>Ruta<span style={{ color: 'var(--verde-medio)' }}>Raíz</span></span>
+    <header className="navbar navbar-expand-md navbar-light bg-white sticky-top shadow-sm py-3">
+      <div className="container">
+        {/* Logo - solo imagen + texto */}
+        <Link to="/" className="navbar-brand d-flex align-items-center gap-2">
+          <img src="/logoRutaRaiz.png" alt="RutaRaíz" height="40" />
+          <span className="fw-bold text-dark fs-4">
+            Ruta<span style={{ color: 'var(--verde-medio)' }}>Raíz</span>
+          </span>
         </Link>
 
-        {/* Hamburger móvil */}
-        <button 
-          className="navbar-toggler border-0" 
-          type="button" 
+        {/* Botón hamburguesa */}
+        <button
+          className="navbar-toggler"
+          type="button"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Menu"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* Menú de navegación */}
+        {/* Menú colapsable */}
         <div className={`collapse navbar-collapse ${menuOpen ? 'show' : ''}`}>
-          <ul className="navbar-nav me-auto mb-2 mb-md-0 ms-md-4 gap-2">
+          <ul className="navbar-nav ms-auto mb-2 mb-md-0 gap-3">
             <li className="nav-item">
-              <Link to="/rutas" className="nav-link fw-semibold text-secondary">Rutas</Link>
+              <Link to="/rutas" className="nav-link">Rutas</Link>
             </li>
             <li className="nav-item">
-              <Link to="/planificador" className="nav-link fw-semibold text-secondary">Planificador</Link>
+              <Link to="/planificador" className="nav-link">Planificador</Link>
             </li>
             {isAuthenticated && (
               <li className="nav-item">
-                <Link to="/mis-planificaciones" className="nav-link fw-semibold text-secondary">
-                  Mis Planificaciones
-                </Link>
+                <Link to="/mis-planificaciones" className="nav-link">Mis Planificaciones</Link>
               </li>
             )}
-            {/* Enlace dinámico exclusivo para administradores */}
             {isAuthenticated && user?.rol === 'admin' && (
               <li className="nav-item">
-                <Link to="/admin" className="nav-link fw-bold text-danger">
-                  Panel Admin
-                </Link>
+                <Link to="/admin" className="nav-link text-danger fw-bold">Panel Admin</Link>
               </li>
             )}
           </ul>
 
-          {/* Acciones de usuario */}
-          <div className="d-flex align-items-center gap-3">
+          {/* Acciones de usuario a la derecha */}
+          <div className="d-flex align-items-center gap-3 ms-md-3">
             {isAuthenticated ? (
               <>
-                <span className="fw-bold text-dark small">
-                  👋 {user?.nick} <span className="badge bg-secondary ms-1 text-capitalize">{user?.rol}</span>
-                </span>
-                <button 
-                  className="btn btn-sm btn-outline-danger px-3 fw-bold" 
-                  onClick={handleLogout}
-                  style={{ borderRadius: 'var(--radius-md)' }}
-                >
+                <Link to="/perfil" className="text-dark text-decoration-none">
+                  👋 {user?.nick} <span className="badge bg-secondary">{user?.rol}</span>
+                </Link>
+                <button className="btn btn-sm btn-outline-danger" onClick={handleLogout}>
                   Cerrar sesión
                 </button>
               </>
             ) : (
               <>
-                <button 
-                  className="btn btn-sm btn-outline-success px-3 fw-bold" 
-                  onClick={() => navigate('/login')}
-                  style={{ borderRadius: 'var(--radius-md)' }}
-                >
+                <button className="btn btn-sm btn-outline-success" onClick={() => navigate('/login')}>
                   Iniciar sesión
                 </button>
-                <button 
-                  className="btn btn-sm text-white px-3 fw-bold" 
-                  onClick={() => navigate('/register')}
-                  style={{ background: 'var(--verde-bosque)', borderRadius: 'var(--radius-md)' }}
-                >
+                <button className="btn btn-sm text-white" style={{ background: 'var(--verde-bosque)' }} onClick={() => navigate('/register')}>
                   Registrarse
                 </button>
               </>
             )}
           </div>
         </div>
-      </Container>
+      </div>
     </header>
   );
 }

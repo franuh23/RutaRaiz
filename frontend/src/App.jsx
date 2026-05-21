@@ -11,6 +11,8 @@ import RegisterPage from './pages/RegisterPage';
 import MisPlanificacionesPage from './pages/MisPlanificacionesPage';
 import PlanificacionDetallePage from './pages/PlanificacionDetallePage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import PerfilPage from './pages/PerfilPage';
+import AlojamientoDetailPage from './pages/AlojamientoDetailPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 export default function App() {
@@ -26,10 +28,12 @@ export default function App() {
           <Route path="/planificador" element={<PlanificadorPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/alojamientos/:id" element={<AlojamientoDetailPage />} />
 
           {/* Rutas Protegidas: Cualquier usuario logueado */}
           <Route path="/mis-planificaciones" element={<ProtectedRoute><MisPlanificacionesPage /></ProtectedRoute>} />
           <Route path="/mis-planificaciones/:id" element={<ProtectedRoute><PlanificacionDetallePage /></ProtectedRoute>} />
+          <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />
 
           {/* Rutas Protegidas de Administración: Solo rol 'admin' */}
           <Route 

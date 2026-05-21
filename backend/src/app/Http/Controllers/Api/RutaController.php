@@ -101,11 +101,12 @@ class RutaController extends Controller
     }
 
     /**
-    * Calcula las etapas de una ruta según los parámetros del usuario.
+    * Calcula las etapas de una ruta según los parámetros del usuario incluyendo alojamientos.
     */
     public function planificar(PlanificarRequest $request)
     {
-        $ruta = Ruta::with('localizaciones')->findOrFail($request->ruta_id);
+        // Cargamos las localizaciones con sus respectivos alojamientos para tenerlos listos
+        $ruta = Ruta::with('localizaciones.alojamientos')->findOrFail($request->ruta_id);
         $localizaciones = $ruta->localizaciones->sortBy('distancia_desde_inicio');
 
         $inicioId = $request->localizacion_inicio_id;
@@ -128,14 +129,16 @@ class RutaController extends Controller
             $distanciaTramo = $localizaciones[$i]->distancia_desde_inicio - $localizaciones[$i-1]->distancia_desde_inicio;
 
             if ($kmAcumuladosDia + $distanciaTramo > $kmDia && $kmAcumuladosDia > 0) {
+                $destinoEtapa = $localizaciones[$i-1];
                 $etapas[] = [
                     'dia' => $dia,
                     'inicio' => $inicioEtapa->nombre,
-                    'fin' => $localizaciones[$i-1]->nombre,
+                    'fin' => $destinoEtapa->nombre,
                     'distancia' => round($kmAcumuladosDia, 1),
+                    'alojamientos' => $destinoEtapa->alojamientos ?? []
                 ];
                 $dia++;
-                $inicioEtapa = $localizaciones[$i-1];
+                $inicioEtapa = $destinoEtapa;
                 $kmAcumuladosDia = $distanciaTramo;
             } else {
                 $kmAcumuladosDia += $distanciaTramo;
@@ -143,11 +146,13 @@ class RutaController extends Controller
         }
 
         if ($kmAcumuladosDia > 0) {
+            $destinoFinal = $localizaciones[$indiceFin];
             $etapas[] = [
                 'dia' => $dia,
                 'inicio' => $inicioEtapa->nombre,
-                'fin' => $localizaciones[$indiceFin]->nombre,
+                'fin' => $destinoFinal->nombre,
                 'distancia' => round($kmAcumuladosDia, 1),
+                'alojamientos' => $destinoFinal->alojamientos ?? []
             ];
         }
 
