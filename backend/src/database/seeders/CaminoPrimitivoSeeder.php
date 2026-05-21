@@ -27,6 +27,9 @@ class CaminoPrimitivoSeeder extends Seeder
             ]
         );
 
+        // Eliminar localizaciones antiguas para evitar duplicados
+        $ruta->localizaciones()->delete();
+
         // Insertar localizaciones
         $localizaciones = [
             ['nombre' => 'Oviedo', 'distancia_desde_inicio' => 0, 'distancia_desde_fin' => 320, 'descripcion' => 'Inicio del camino Primitivo.'],

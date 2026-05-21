@@ -1,0 +1,36 @@
+.section {
+  padding: 80px 0;
+  background: var(--crema);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 52px;
+}
+
+.titulo {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  color: var(--verde-bosque);
+  margin-bottom: 14px;
+}
+
+.sub {
+  font-size: 1rem;
+  color: var(--piedra);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.steps {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  .steps {
+    flex-direction: column;
+    gap: 20px;
+  }
+}

@@ -1,21 +1,23 @@
-import React, { Fragment } from 'react';
-import { Routes, Route } from "react-router";
-import './App.css'
-import PiePagina from './componentes/estructura/PiePagina.jsx';
-import Cabecera from './componentes/estructura/Cabecera.jsx';
-import Navegacion from './componentes/estructura/Navegacion.jsx'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import './styles/globals.css';
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
+import HomePage from './pages/HomePage';
+import RutasPage from './pages/RutasPage';
+import RutaDetailPage from './pages/RutaDetailPage';
+import PlanificadorPage from './pages/PlanificadorPage';
 
-function App() {
-
+export default function App() {
   return (
-    <Fragment>
-      <Cabecera>
-        <Navegacion />
-      </Cabecera>
-      <Routes></Routes>
-      <PiePagina />
-    </Fragment>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/rutas" element={<RutasPage />} />
+        <Route path="/rutas/:id" element={<RutaDetailPage />} />
+        <Route path="/planificador" element={<PlanificadorPage />} />
+      </Routes>
+      <Footer />
+    </BrowserRouter>
   );
 }
-
-export default App

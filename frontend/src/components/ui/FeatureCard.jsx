@@ -1,0 +1,15 @@
+import styles from './FeatureCard.module.css';
+
+export default function FeatureCard({ feature }) {
+  const { icono, titulo, descripcion } = feature;
+
+  return (
+    <div className={styles.card}>
+      <div className={styles.iconWrapper}>
+        <span className={styles.icon} role="img" aria-label={titulo}>{icono}</span>
+      </div>
+      <h3 className={styles.titulo}>{titulo}</h3>
+      <p className={styles.desc}>{descripcion}</p>
+    </div>
+  );
+}

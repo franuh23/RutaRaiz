@@ -1,0 +1,115 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.titulo {
+  font-size: 2.5rem;
+  color: var(--verde-bosque);
+  margin-bottom: 1rem;
+}
+
+.imagen {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+}
+
+.info {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.infoGrid {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.infoItem {
+  background: var(--crema-oscura);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+}
+
+.descripcion {
+  margin-top: 1rem;
+  color: #555;
+}
+
+.seccion {
+  margin-top: 2rem;
+}
+
+.seccion h3 {
+  font-size: 1.5rem;
+  color: var(--verde-hoja);
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--oro);
+  padding-left: 1rem;
+}
+
+.localizacionCard {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.localizacionCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.localizacionNombre {
+  font-size: 1.2rem;
+  color: var(--tierra);
+  margin-bottom: 0.25rem;
+}
+
+.localizacionDistancia {
+  font-size: 0.8rem;
+  color: var(--piedra);
+  margin-bottom: 0.5rem;
+}
+
+.alojamientosLista {
+  margin-top: 0.75rem;
+  padding-left: 1rem;
+  list-style: none;
+}
+
+.alojamientoItem {
+  background: var(--crema);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.alojamientoNombre {
+  font-weight: 600;
+  color: var(--verde-medio);
+}
+
+.alojamientoTipo {
+  font-size: 0.8rem;
+  color: var(--piedra);
+  margin-left: 0.5rem;
+}
+
+.alojamientoTelefono {
+  font-size: 0.8rem;
+  color: var(--tierra);
+  margin-left: 0.5rem;
+}

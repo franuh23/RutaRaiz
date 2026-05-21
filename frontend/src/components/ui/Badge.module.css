@@ -1,0 +1,41 @@
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.default {
+  background: rgba(93, 158, 56, 0.15);
+  color: var(--verde-medio);
+  border: 1px solid rgba(93, 158, 56, 0.3);
+}
+
+.gold {
+  background: rgba(232, 197, 71, 0.15);
+  color: var(--oro);
+  border: 1px solid rgba(232, 197, 71, 0.4);
+}
+
+.gold-solid {
+  background: var(--oro);
+  color: var(--verde-bosque);
+}
+
+.difficulty-easy {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.difficulty-medium {
+  background: #fff8e1;
+  color: #f57f17;
+}
+
+.difficulty-hard {
+  background: #fce4ec;
+  color: #c62828;
+}
