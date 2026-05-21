@@ -25,28 +25,38 @@ class DatabaseSeeder extends Seeder
         // Seeder del Camino primitivo con localizaciones reales
         $this->call(CaminoPrimitivoSeeder::class);
 
-        // Usuarios fake
-        Usuario::factory(10)->create();
+        // 10 usuarios para utilizarlos después
+        $usuarios = Usuario::factory(10)->create();
 
-        // 5 rutas fake con localizaciones y alojamientos
+        // Rutas, localizaciones y alojamientos vinculados a los 10 usuarios
         Ruta::factory(5)
-            ->has(Localizacion::factory(fake()->numberBetween(10, 50))
-            ->has(Alojamiento::factory(fake()->numberBetween(1, 5)), 'alojamientos'),'localizaciones')
-        ->create();
+            ->has(
+                Localizacion::factory(fake()->numberBetween(10, 50))
+                    ->has(Alojamiento::factory(fake()->numberBetween(1, 5)), 'alojamientos'),'localizaciones')
+            ->create();
 
         // Comentarios fake de rutas
-        Ruta::all()->each(function ($ruta) {
-            ComentarioRuta::factory(3)->create(['ruta_id' => $ruta->id]);
+        Ruta::all()->each(function ($ruta) use ($usuarios) {
+            ComentarioRuta::factory(3)->create([
+                'ruta_id' => $ruta->id,
+                'usuario_id' => $usuarios->random()->id
+            ]);
         });
 
         // Comentarios fake de localizaciones
-        Localizacion::all()->each(function ($localizacion) {
-            ComentarioLocalizacion::factory(2)->create(['localizacion_id' => $localizacion->id]);
+        Localizacion::all()->each(function ($localizacion) use ($usuarios) {
+            ComentarioLocalizacion::factory(2)->create([
+                'localizacion_id' => $localizacion->id,
+                'usuario_id' => $usuarios->random()->id
+            ]);
         });
 
         // Comentarios fake de alojamientos
-        Alojamiento::all()->each(function ($alojamiento) {
-            ComentarioAlojamiento::factory(2)->create(['alojamiento_id' => $alojamiento->id]);
+        Alojamiento::all()->each(function ($alojamiento) use ($usuarios) {
+            ComentarioAlojamiento::factory(2)->create([
+                'alojamiento_id' => $alojamiento->id,
+                'usuario_id' => $usuarios->random()->id
+            ]);
         });
     }
 }
