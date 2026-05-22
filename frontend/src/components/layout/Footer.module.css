@@ -1,49 +1,12 @@
 .footer {
   background: var(--verde-bosque);
-  color: rgba(255,255,255,0.75);
-  padding: 56px 0 32px;
-  font-size: 0.88rem;
+  padding: 20px 0;
+  font-size: 0.85rem;
 }
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 40px;
-  margin-bottom: 40px;
-}
-
-.colTitle {
-  font-family: var(--font-display);
-  color: #fff;
-  font-size: 1rem;
-  margin-bottom: 16px;
-}
-
-.colLink {
-  display: block;
-  color: rgba(255,255,255,0.65);
-  text-decoration: none;
-  margin-bottom: 10px;
-  transition: color var(--transition);
-}
-
-.colLink:hover { color: var(--oro); }
 
 .copyright {
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 24px;
   text-align: center;
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.45);
-}
-
-@media (max-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 28px;
-  }
-}
-
-@media (max-width: 480px) {
-  .grid { grid-template-columns: 1fr; }
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }

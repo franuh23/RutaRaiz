@@ -24,7 +24,7 @@ class PlanificacionResource extends JsonResource
             'localizacion_inicio_nombre' => $this->localizacionInicio->nombre ?? null,
             'localizacion_fin_id' => $this->localizacion_fin_id,
             'localizacion_fin_nombre' => $this->localizacionFin->nombre ?? null,
-            'fecha_inicio' => $this->fecha_inicio?->format('Y-m-d'),
+            'fecha_inicio' => $this->fecha_inicio ? \Carbon\Carbon::parse($this->fecha_inicio)->format('d-m-Y') : null,
             'km_dia' => $this->km_dia,
             'dias_totales' => $this->dias_totales,
             'activo' => $this->activo,

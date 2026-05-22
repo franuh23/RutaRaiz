@@ -1,9 +1,12 @@
-import Button from '../ui/Button';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Badge from '../ui/Badge';
 import Container from '../layout/Container';
 import styles from './HeroSection.module.css';
 
-export default function HeroSection() {
+export default function HeroSection({ onPlanificar }) {
+  const navigate = useNavigate();
+
   return (
     <section className={styles.hero}>
       {/* Decoración de fondo */}
@@ -11,12 +14,10 @@ export default function HeroSection() {
 
       <Container>
         <div className={styles.content}>
-          <Badge variant="gold">🥾 +200 rutas GR en España</Badge>
+          <Badge variant="gold">🥾 Planificador Oficial</Badge>
 
           <h1 className={styles.titulo}>
-            Planifica tu{' '}
-            <span className={styles.accent}>aventura</span>
-            {' '}por etapas
+            Planifica tu <span className={styles.accent}>aventura</span> por etapas
           </h1>
 
           <p className={styles.subtitulo}>
@@ -25,16 +26,28 @@ export default function HeroSection() {
           </p>
 
           <div className={styles.botones}>
-            <Button variant="primary" size="lg">🎒 Comenzar mi ruta</Button>
-            <Button variant="secondary" size="lg">Explorar rutas</Button>
+            <button 
+              className="btn btn-success px-4 py-2 fw-bold text-white shadow-sm"
+              onClick={onPlanificar}
+              style={{ borderRadius: 'var(--radius-md)', background: 'var(--verde-medio)', border: 'none' }}
+            >
+              🎒 Comenzar mi ruta
+            </button>
+            <button 
+              className="btn btn-outline-light px-4 py-2 fw-semibold"
+              onClick={() => navigate('/rutas')}
+              style={{ borderRadius: 'var(--radius-md)' }}
+            >
+              Explorar rutas
+            </button>
           </div>
 
           {/* Stats rápidos */}
           <div className={styles.stats}>
             {[
-              { valor: '+200', label: 'Rutas GR' },
-              { valor: '+12k', label: 'Senderistas' },
-              { valor: '17',   label: 'Comunidades autónomas' },
+              { valor: 'Primitivo', label: 'Camino Estrella' },
+              { valor: '100%', label: 'Albergues Reales' },
+              { valor: 'A medida',   label: 'Etapas Diarias' },
             ].map((s) => (
               <div key={s.label} className={styles.stat}>
                 <span className={styles.statValor}>{s.valor}</span>

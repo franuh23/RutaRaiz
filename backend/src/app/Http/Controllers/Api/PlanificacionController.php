@@ -109,76 +109,47 @@ class PlanificacionController extends Controller
     }
 
     /**
-     * Display the specified resource
+     * Display the specified resource.
      */
     public function show(string $id)
-    {
-        // Cargamos la planificación con su ruta, localizaciones y los alojamientos de estas
-        $planificacion = Planificacion::with(['ruta.localizaciones.alojamientos'])
-            ->where('usuario_id', Auth::id())
-            ->findOrFail($id);
+     {
+         // Cargamos la planificación directamente con las etapas guardadas en la BD
+         // y sus respectivas localizaciones de inicio y fin (Eager Loading)
+         $planificacion = Planificacion::with([
+             'ruta',
+             'etapas.localizacionInicio.alojamientos',
+             'etapas.localizacionFin.alojamientos'
+         ])
+         ->where('usuario_id', Auth::id())
+         ->findOrFail($id);
 
-        $localizaciones = $planificacion->ruta->localizaciones->sortBy('distancia_desde_inicio');
+         // Formateamos las etapas leyendo directamente de las tablas de la BD
+         $etapasFormateadas = $planificacion->etapas->map(function ($etapa) {
+             return [
+                 'dia' => $etapa->dia,
+                 'inicio' => $etapa->localizacionInicio->nombre,
+                 'fin' => $etapa->localizacionFin->nombre,
+                 'distancia' => round($etapa->distancia, 1),
+                 // Agrupamos los alojamientos disponibles en el punto de destino de la etapa
+                 'alojamientos' => $etapa->localizacionFin->alojamientos ?? []
+             ];
+         });
 
-        $inicioId = $planificacion->localizacion_inicio_id;
-        $finId = $planificacion->localizacion_fin_id;
+         // Calculamos los kilómetros totales sumando lo que se guardó físicamente en las etapas
+         $totalKm = $planificacion->etapas->sum('distancia');
 
-        $indiceInicio = $localizaciones->search(fn($loc) => $loc->id == $inicioId);
-        $indiceFin = $finId ? $localizaciones->search(fn($loc) => $loc->id == $finId) : $localizaciones->count() - 1;
-
-        if ($indiceInicio === false || $indiceFin === false || $indiceInicio >= $indiceFin) {
-            return response()->json(['error' => 'Datos de planificación corruptos o inválidos'], 422);
-        }
-
-        $kmDia = $planificacion->km_dia;
-        $etapas = [];
-        $dia = 1;
-        $kmAcumuladosDia = 0;
-        $inicioEtapa = $localizaciones[$indiceInicio];
-
-        for ($i = $indiceInicio + 1; $i <= $indiceFin; $i++) {
-            $distanciaTramo = $localizaciones[$i]->distancia_desde_inicio - $localizaciones[$i-1]->distancia_desde_inicio;
-
-            if ($kmAcumuladosDia + $distanciaTramo > $kmDia && $kmAcumuladosDia > 0) {
-                $destinoEtapa = $localizaciones[$i-1];
-                $etapas[] = [
-                    'dia' => $dia,
-                    'inicio' => $inicioEtapa->nombre,
-                    'fin' => $destinoEtapa->nombre,
-                    'distancia' => round($kmAcumuladosDia, 1),
-                    'alojamientos' => $destinoEtapa->alojamientos ?? []
-                ];
-                $dia++;
-                $inicioEtapa = $destinoEtapa;
-                $kmAcumuladosDia = $distanciaTramo;
-            } else {
-                $kmAcumuladosDia += $distanciaTramo;
-            }
-        }
-
-        if ($kmAcumuladosDia > 0) {
-            $destinoFinal = $localizaciones[$indiceFin];
-            $etapas[] = [
-                'dia' => $dia,
-                'inicio' => $inicioEtapa->nombre,
-                'fin' => $destinoFinal->nombre,
-                'distancia' => round($kmAcumuladosDia, 1),
-                'alojamientos' => $destinoFinal->alojamientos ?? []
-            ];
-        }
-
-        return response()->json([
-            'data' => [
-                'id' => $planificacion->id,
-                'fecha_inicio' => $planificacion->fecha_inicio,
-                'km_dia' => $planificacion->km_dia,
-                'ruta_nombre' => $planificacion->ruta->nombre,
-                'total_km' => round($localizaciones[$indiceFin]->distancia_desde_inicio - $localizaciones[$indiceInicio]->distancia_desde_inicio, 1),
-                'dias_totales' => count($etapas),
-                'etapas' => $etapas
-            ]
-        ]);
-    }
+         return response()->json([
+             'data' => [
+                 'id' => $planificacion->id,
+                 'fecha_inicio' => $planificacion->fecha_inicio,
+                 'km_dia' => $planificacion->km_dia,
+                 'ruta_nombre' => $planificacion->ruta->nombre,
+                 'total_km' => round($totalKm, 1),
+                 'dias_totales' => $planificacion->dias_totales,
+                 'etapas' => $etapasFormateadas
+             ]
+         ]);
+     }
 
     /**
      * Update the specified resource in storage.
