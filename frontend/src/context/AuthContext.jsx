@@ -53,10 +53,15 @@ export const AuthProvider = ({ children }) => {
             throw new Error(data.message || 'Error al iniciar sesión');
         }
 
+        const userObj = data.user;
+        if (userObj && userObj.avatar && !userObj.avatar_url) {
+            userObj.avatar_url = `/storage/${userObj.avatar}`;
+        }
+
         localStorage.setItem('token', data.access_token);
         setToken(data.access_token);
-        setUser(data.user);
-        return data.user;
+        setUser(userObj);
+        return userObj;
     };
 
     // Función para Cerrar Sesión
@@ -80,7 +85,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user, loading }}>
+        <AuthContext.Provider value={{ user, setUser, token, login, logout, isAuthenticated: !!user, loading }}>
             {children}
         </AuthContext.Provider>
     );

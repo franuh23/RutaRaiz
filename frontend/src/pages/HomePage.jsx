@@ -14,7 +14,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Lanzamos las tres peticiones concurrentes a tus endpoints de Laravel
+    // Peticiones concurrentes a tus endpoints de Laravel
     Promise.all([
       fetch('/api/rutas').then(res => res.json()),
       fetch('/api/localizaciones').then(res => res.json()),

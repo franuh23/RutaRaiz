@@ -19,7 +19,9 @@ export default function PlanificacionDetallePage() {
   }, [loading, isAuthenticated, navigate]);
 
   useEffect(() => {
+    if (loading) return;
     if (!token) return;
+
     fetch(`/api/planificaciones/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -27,7 +29,7 @@ export default function PlanificacionDetallePage() {
       }
     })
       .then(res => {
-        if (!res.ok) throw new Error('No encontrada');
+        if (!res.ok) throw new Error('Planificación no localizada');
         return res.json();
       })
       .then(data => {
@@ -36,14 +38,15 @@ export default function PlanificacionDetallePage() {
       })
       .catch(err => {
         console.error(err);
+        setCargando(false);
         navigate('/mis-planificaciones');
       });
-  }, [token, id, navigate]);
+  }, [token, id, loading, navigate]);
 
   if (loading || cargando) {
     return (
       <Container>
-        <div className="text-center py-5 text-muted">Cargando...</div>
+        <div className="text-center py-5 text-muted small">Abriendo cuaderno de ruta...</div>
       </Container>
     );
   }
@@ -51,12 +54,12 @@ export default function PlanificacionDetallePage() {
   if (!planificacion) return null;
 
   return (
-    <Container>
+    <Container className="pb-5">
       <div className="d-flex align-items-center gap-3 my-4 flex-wrap">
         <button 
-          className="btn btn-outline-success px-3" 
+          className="btn btn-outline-success px-3 btn-sm" 
           onClick={() => navigate('/mis-planificaciones')}
-          style={{ fontWeight: '600', borderRadius: 'var(--radius-md)', borderSize: '2px' }}
+          style={{ fontWeight: '600', borderRadius: 'var(--radius-md)' }}
         >
           ← Volver
         </button>
@@ -67,18 +70,18 @@ export default function PlanificacionDetallePage() {
 
       <ResumenPlanificacion planificacion={planificacion} />
 
-      <div className="mb-5">
-        <h2 className="h4 mb-3 ps-2" style={{ borderLeft: '4px solid var(--oro)', color: 'var(--verde-bosque)', fontWeight: '700' }}>
-          📋 Etapas del recorrido
+      <div className="mt-4">
+        <h2 className="h5 mb-3 ps-2" style={{ borderLeft: '4px solid var(--oro)', color: 'var(--verde-bosque)', fontWeight: '700' }}>
+          📋 Etapas del recorrido personalizado
         </h2>
         {planificacion.etapas?.length > 0 ? (
-          <div>
+          <div className="d-flex flex-column gap-2">
             {planificacion.etapas.map((etapa) => (
               <EtapaCard key={etapa.id} etapa={etapa} />
             ))}
           </div>
         ) : (
-          <p className="text-muted text-center py-3">No hay etapas registradas para esta planificación.</p>
+          <p className="text-muted text-center py-4 bg-light rounded small">No hay etapas configuradas en esta marcha.</p>
         )}
       </div>
     </Container>

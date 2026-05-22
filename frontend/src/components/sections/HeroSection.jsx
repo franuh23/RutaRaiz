@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Badge from '../ui/Badge';
+import Button from '../ui/Button';
 import Container from '../layout/Container';
 import styles from './HeroSection.module.css';
 
@@ -26,20 +27,21 @@ export default function HeroSection({ onPlanificar }) {
           </p>
 
           <div className={styles.botones}>
-            <button 
+            <button
               className="btn btn-success px-4 py-2 fw-bold text-white shadow-sm"
               onClick={onPlanificar}
               style={{ borderRadius: 'var(--radius-md)', background: 'var(--verde-medio)', border: 'none' }}
             >
               🎒 Comenzar mi ruta
             </button>
-            <button 
-              className="btn btn-outline-light px-4 py-2 fw-semibold"
+            
+            <Button
+              variant="outline"
+              size="md"
               onClick={() => navigate('/rutas')}
-              style={{ borderRadius: 'var(--radius-md)' }}
             >
               Explorar rutas
-            </button>
+            </Button>
           </div>
 
           {/* Stats rápidos */}
@@ -47,7 +49,7 @@ export default function HeroSection({ onPlanificar }) {
             {[
               { valor: 'Primitivo', label: 'Camino Estrella' },
               { valor: '100%', label: 'Albergues Reales' },
-              { valor: 'A medida',   label: 'Etapas Diarias' },
+              { valor: 'A medida', label: 'Etapas Diarias' },
             ].map((s) => (
               <div key={s.label} className={styles.stat}>
                 <span className={styles.statValor}>{s.valor}</span>

@@ -15,54 +15,51 @@ export default function PlanificadorPage() {
   const [mensajeGuardado, setMensajeGuardado] = useState('');
   const [localizaciones, setLocalizaciones] = useState([]);
 
-  // --- PERSISTENCIA: Inicializar estados desde localStorage ---
+  // Estados inicializados con Lazy Initialization segura
   const [selectedRuta, setSelectedRuta] = useState(() => localStorage.getItem('rr_selectedRuta') || '');
   const [inicioId, setInicioId] = useState(() => localStorage.getItem('rr_inicioId') || '');
   const [finId, setFinId] = useState(() => localStorage.getItem('rr_finId') || '');
   const [kmDia, setKmDia] = useState(() => Number(localStorage.getItem('rr_kmDia')) || 20);
   const [fechaInicio, setFechaInicio] = useState(() => localStorage.getItem('rr_fechaInicio') || '');
   const [etapas, setEtapas] = useState(() => {
-    const savedEtapas = localStorage.getItem('rr_etapas');
-    return savedEtapas ? JSON.parse(savedEtapas) : null;
+    const saved = localStorage.getItem('rr_etapas');
+    return saved && saved !== "undefined" ? JSON.parse(saved) : null;
   });
 
-  // --- PERSISTENCIA: Sincronizar cambios en localStorage ---
-  useEffect(() => { localStorage.setItem('rr_selectedRuta', selectedRuta); }, [selectedRuta]);
-  useEffect(() => { localStorage.setItem('rr_inicioId', inicioId); }, [inicioId]);
-  useEffect(() => { localStorage.setItem('rr_finId', finId); }, [finId]);
-  useEffect(() => { localStorage.setItem('rr_kmDia', kmDia); }, [kmDia]);
-  useEffect(() => { localStorage.setItem('rr_fechaInicio', fechaInicio); }, [fechaInicio]);
+  // Un solo efecto centralizado para guardar la caché del formulario (así evitamos 6 re-renders simultáneos)
   useEffect(() => {
+    localStorage.setItem('rr_selectedRuta', selectedRuta);
+    localStorage.setItem('rr_inicioId', inicioId);
+    localStorage.setItem('rr_finId', finId);
+    localStorage.setItem('rr_kmDia', kmDia.toString());
+    localStorage.setItem('rr_fechaInicio', fechaInicio);
     if (etapas) {
       localStorage.setItem('rr_etapas', JSON.stringify(etapas));
     } else {
       localStorage.removeItem('rr_etapas');
     }
-  }, [etapas]);
+  }, [selectedRuta, inicioId, finId, kmDia, fechaInicio, etapas]);
 
-  // Cargar lista de rutas inicial
   useEffect(() => {
     fetch('/api/rutas')
       .then(res => res.json())
       .then(data => setRutas(data.data || []))
-      .catch(err => console.error(err));
+      .catch(err => console.error("Error cargando rutas base:", err));
   }, []);
 
-  // Cargar localizaciones de la ruta seleccionada (respeta si ya había ids guardados)
   useEffect(() => {
     if (selectedRuta) {
       fetch(`/api/rutas/${selectedRuta}`)
         .then(res => res.json())
         .then(data => {
           setLocalizaciones(data.data.localizaciones || []);
-          // Solo limpiamos los IDs si la ruta ha cambiado de verdad y no coincide con lo guardado
           if (localStorage.getItem('rr_selectedRuta') !== selectedRuta) {
             setInicioId('');
             setFinId('');
             setEtapas(null);
           }
         })
-        .catch(err => console.error(err));
+        .catch(err => console.error("Error cargando mapa de hitos:", err));
     } else {
       setLocalizaciones([]);
     }
@@ -81,10 +78,10 @@ export default function PlanificadorPage() {
       if (response.ok) {
         setEtapas(data);
       } else {
-        setError(data.error || 'Error al planificar');
+        setError(data.error || 'Error al procesar el algoritmo de etapas');
       }
     } catch (err) {
-      setError('Error de conexión');
+      setError('Error en la comunicación con el servidor de mapas.');
     } finally {
       setLoading(false);
     }
@@ -120,13 +117,12 @@ export default function PlanificadorPage() {
       const data = await response.json();
       if (response.ok) {
         setMensajeGuardado('¡Planificación guardada correctamente!');
-        // Limpiamos la caché del planificador al guardar con éxito para poder hacer otra nueva
         handleLimpiarCache();
       } else {
-        setError(data.message || 'Error al guardar');
+        setError(data.message || 'Error al archivar la ruta');
       }
     } catch (err) {
-      setError('Error de conexión');
+      setError('Error de red al consolidar la información.');
     } finally {
       setGuardando(false);
     }
@@ -141,12 +137,7 @@ export default function PlanificadorPage() {
     setEtapas(null);
     setError('');
     setMensajeGuardado('');
-    localStorage.removeItem('rr_selectedRuta');
-    localStorage.removeItem('rr_inicioId');
-    localStorage.removeItem('rr_finId');
-    localStorage.removeItem('rr_kmDia');
-    localStorage.removeItem('rr_fechaInicio');
-    localStorage.removeItem('rr_etapas');
+    localStorage.clear(); // O borras uno a uno si tienes tokens guardados fuera de rr_
   };
 
   return (
@@ -157,7 +148,7 @@ export default function PlanificadorPage() {
         </h1>
         {(selectedRuta || etapas) && (
           <button className="btn btn-sm btn-outline-secondary px-3" onClick={handleLimpiarCache} style={{ borderRadius: 'var(--radius-md)' }}>
-            🧹 Limpiar Formulario
+            实时 🧹 Limpiar Formulario
           </button>
         )}
       </div>

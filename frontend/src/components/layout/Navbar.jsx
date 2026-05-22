@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import Container from './Container';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,6 +11,9 @@ export default function Navbar() {
     await logout();
     navigate('/');
   };
+
+  // Generamos el avatar por defecto con las iniciales si el usuario no tiene foto subida
+  const avatarPorDefecto = `https://api.dicebear.com/7.x/initials/svg?seed=${user?.nick || 'Peregrino'}&backgroundType=gradientLinear&backgroundColor=4e6e58,2d4a34`;
 
   return (
     <header className="navbar navbar-expand-md navbar-light bg-white sticky-top shadow-sm py-3">
@@ -24,7 +26,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Botón hamburguesa */}
+        {/* Botón hamburguesa para móviles */}
         <button
           className="navbar-toggler"
           type="button"
@@ -55,22 +57,29 @@ export default function Navbar() {
           </ul>
 
           {/* Acciones de usuario a la derecha */}
-          <div className="d-flex align-items-center gap-3 ms-md-3">
+          <div className="d-flex align-items-center gap-3 ms-md-3 mt-3 mt-md-0">
             {isAuthenticated ? (
               <>
-                <Link to="/perfil" className="text-dark text-decoration-none">
-                  👋 {user?.nick} <span className="badge bg-secondary">{user?.rol}</span>
+                {/* Enlace al perfil con la foto redonda y el Nick, sin el rol */}
+                <Link to="/perfil" className="text-dark text-decoration-none d-flex align-items-center gap-2 fw-semibold">
+                  <img 
+                    src={user?.avatar_url || avatarPorDefecto} 
+                    alt={`Avatar de ${user?.nick}`}
+                    className="rounded-circle border"
+                    style={{ width: '32px', height: '32px', objectFit: 'cover' }}
+                  />
+                  <span>{user?.nick}</span>
                 </Link>
-                <button className="btn btn-sm btn-outline-danger" onClick={handleLogout}>
+                <button className="btn btn-sm btn-outline-danger" onClick={handleLogout} style={{ borderRadius: 'var(--radius-md)' }}>
                   Cerrar sesión
                 </button>
               </>
             ) : (
               <>
-                <button className="btn btn-sm btn-outline-success" onClick={() => navigate('/login')}>
+                <button className="btn btn-sm btn-outline-success" onClick={() => navigate('/login')} style={{ borderRadius: 'var(--radius-md)' }}>
                   Iniciar sesión
                 </button>
-                <button className="btn btn-sm text-white" style={{ background: 'var(--verde-bosque)' }} onClick={() => navigate('/register')}>
+                <button className="btn btn-sm text-white" style={{ background: 'var(--verde-bosque)', borderRadius: 'var(--radius-md)' }} onClick={() => navigate('/register')}>
                   Registrarse
                 </button>
               </>

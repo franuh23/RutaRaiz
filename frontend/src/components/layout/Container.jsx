@@ -1,8 +1,8 @@
-import styles from './Container.module.css';
+import React from 'react';
 
 export default function Container({ children, className = '' }) {
   return (
-    <div className={[styles.container, className].join(' ')}>
+    <div className={`container-xl ${className}`}>
       {children}
     </div>
   );

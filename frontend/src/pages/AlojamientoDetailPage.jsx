@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Container from '../components/layout/Container';
@@ -9,10 +9,10 @@ export default function AlojamientoDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { token, user } = useAuth();
-  const [alojamiento, setAlojamiento] = useState(null);
+  const [alofamiento, setAlojamiento] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const cargarAlojamiento = () => {
+  const cargarAlojamiento = useCallback(() => {
     fetch(`/api/alojamientos/${id}`)
       .then((res) => res.json())
       .then((resData) => {
@@ -20,16 +20,17 @@ export default function AlojamientoDetailPage() {
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Error al refrescar albergue:", err);
         setLoading(false);
       });
-  };
+  }, [id]);
 
   useEffect(() => {
     cargarAlojamiento();
-  }, [id]);
+  }, [cargarAlojamiento]);
 
   const handleEnviarComentario = async (texto) => {
+    if (!texto.trim()) return;
     try {
       const res = await fetch('/api/comentarios', {
         method: 'POST',
@@ -44,43 +45,41 @@ export default function AlojamientoDetailPage() {
         })
       });
       if (res.ok) {
-        cargarAlojamiento(); // Recargar datos para pintar el nuevo comentario con su usuario
+        cargarAlojamiento();
       }
     } catch (err) {
       console.error('Error al publicar comentario:', err);
     }
   };
 
-  if (loading) return <Container><div className="text-center py-5 text-muted">Cargando detalles...</div></Container>;
-  if (!alojamiento) return <Container><div className="alert alert-warning my-4">Alojamiento no encontrado.</div></Container>;
+  if (loading) return <Container><div className="text-center py-5 text-muted small">Abriendo libro de registro...</div></Container>;
+  if (!alofamiento) return <Container><div className="alert alert-warning my-4" style={{ borderRadius: 'var(--radius-md)' }}>Alojamiento no encontrado.</div></Container>;
 
   return (
-    <Container>
-      <div className="py-4">
-        {/* Ficha técnica con los datos limpios */}
-        <AlojamientoFicha alojamiento={alojamiento} />
+    <Container className="mb-5">
+      <div className="py-2">
+        <AlojamientoFicha alojamiento={alofamiento} />
 
-        {/* Módulo modular de Comentarios */}
         <AlojamientoComentarios 
-          comentarios={alojamiento.comentarios} 
+          comentarios={alofamiento.comentarios || []} 
           onEnviarComentario={handleEnviarComentario} 
         />
 
-        {/* Acciones inferiores de navegación */}
-        <div className="d-flex gap-3 fs-5 mt-3 ps-2">
+        <div className="d-flex gap-3 small mt-4 justify-content-end border-top pt-2">
           {user?.rol === 'admin' && (
             <button 
-              className="p-0 bg-transparent text-primary text-decoration-underline border-0"
+              className="btn btn-sm btn-link text-primary text-decoration-none fw-semibold"
               onClick={() => navigate('/admin')}
             >
-              Editar
+              🛠️ Panel de Control
             </button>
           )}
           <button 
-            className="p-0 bg-transparent text-primary text-decoration-underline border-0"
+            className="btn btn-sm btn-outline-secondary px-3"
             onClick={() => navigate(-1)}
+            style={{ borderRadius: 'var(--radius-md)' }}
           >
-            Volver
+            Volver atrás
           </button>
         </div>
       </div>

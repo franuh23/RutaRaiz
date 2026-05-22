@@ -10,6 +10,7 @@ export default function MisPlanificacionesPage() {
   const [planificaciones, setPlanificaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
 
+  // Redirección de seguridad centralizada sin falsos positivos de carga
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       navigate('/login');
@@ -17,7 +18,13 @@ export default function MisPlanificacionesPage() {
   }, [loading, isAuthenticated, navigate]);
 
   useEffect(() => {
-    if (!token) return;
+    // Esperamos a que el contexto termine de comprobar la sesión
+    if (loading) return;
+    if (!token) {
+      setCargando(false);
+      return;
+    }
+
     fetch('/api/planificaciones', {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -30,31 +37,33 @@ export default function MisPlanificacionesPage() {
         setCargando(false);
       })
       .catch(err => {
-        console.error(err);
+        console.error("Error cargando planificaciones:", err);
         setCargando(false);
       });
-  }, [token]);
+  }, [token, loading]);
 
   const handleEliminar = async (id) => {
     if (!confirm('¿Seguro que quieres eliminar esta planificación?')) return;
     try {
-      await fetch(`/api/planificaciones/${id}`, {
+      const response = await fetch(`/api/planificaciones/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         }
       });
-      setPlanificaciones(planificaciones.filter(p => p.id !== id));
+      if (response.ok) {
+        setPlanificaciones(prev => prev.filter(p => p.id !== id));
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Error al eliminar:", err);
     }
   };
 
   if (loading || cargando) {
     return (
       <Container>
-        <div className="text-center py-5 text-muted">Cargando...</div>
+        <div className="text-center py-5 text-muted small">Consultando tu mochila de rutas...</div>
       </Container>
     );
   }
@@ -68,7 +77,7 @@ export default function MisPlanificacionesPage() {
         <button 
           className="btn text-white px-4 py-2" 
           onClick={() => navigate('/planificador')}
-          style={{ background: 'var(--verde-bosque)', fontWeight: '600', borderRadius: 'var(--radius-md)' }}
+          style={{ background: 'var(--verde-bosque)', fontWeight: '600', borderRadius: 'var(--radius-md)', border: 'none' }}
         >
           + Nueva planificación
         </button>
@@ -80,13 +89,13 @@ export default function MisPlanificacionesPage() {
           <button 
             className="btn text-white px-4 py-2" 
             onClick={() => navigate('/planificador')}
-            style={{ background: 'var(--verde-bosque)', fontWeight: '600', borderRadius: 'var(--radius-md)' }}
+            style={{ background: 'var(--verde-bosque)', fontWeight: '600', borderRadius: 'var(--radius-md)', border: 'none' }}
           >
             Crear mi primera ruta
           </button>
         </div>
       ) : (
-        <div className="mb-5">
+        <div className="mb-5 d-flex flex-column gap-3">
           {planificaciones.map(p => (
             <PlanificacionCard 
               key={p.id} 

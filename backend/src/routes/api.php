@@ -36,8 +36,20 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Retorno de datos de sesión activa
     Route::get('/usuario', function (Request $request) {
-        return $request->user();
+        $usuario = $request->user();
+        return response()->json([
+            'id' => $usuario->id,
+            'nombre' => $usuario->nombre,
+            'apellidos' => $usuario->apellidos,
+            'nick' => $usuario->nick,
+            'email' => $usuario->email,
+            'rol' => $usuario->rol,
+            'avatar_url' => $usuario->avatar ? asset('storage/' . $usuario->avatar) : null,
+        ]);
     });
+
+    // Actualizar perfil
+    Route::post('/usuario/update', [AuthController::class, 'updatePerfil']);
 
     // Escritura de recursos globales (Restringido en Frontend/Backend para rol 'admin')
     Route::post('/rutas', [RutaController::class, 'store']);

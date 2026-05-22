@@ -1,36 +1,38 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Badge from './Badge';
 import styles from './RouteCardSimple.module.css';
 
 const DIFFICULTY_VARIANT = {
   baja: 'difficulty-easy',
+  fácil: 'difficulty-easy',
   media: 'difficulty-medium',
   alta: 'difficulty-hard',
+  difícil: 'difficulty-hard',
 };
 
 export default function RouteCardSimple({ ruta }) {
   const navigate = useNavigate();
+  const { id, imagen, nombre = 'Ruta', descripcion, inicio, fin, kilometros = 0, dificultad = 'media' } = ruta || {};
 
-  const handleClick = () => {
-    navigate(`/rutas/${ruta.id}`);
-  };
+  const difNormalizada = dificultad.toLowerCase();
 
   return (
-    <article className={styles.card} onClick={handleClick} style={{ cursor: 'pointer' }}>
-      {ruta.imagen && (
+    <article className={styles.card} onClick={() => id && navigate(`/rutas/${id}`)} style={{ cursor: 'pointer' }}>
+      {imagen && (
         <div className={styles.imageWrapper}>
-          <img src={ruta.imagen} alt={ruta.nombre} className={styles.image} />
+          <img src={imagen} alt={nombre} className={styles.image} />
         </div>
       )}
       <div className={styles.body}>
-        <h3 className={styles.nombre}>{ruta.nombre}</h3>
-        <p className={styles.desc}>{ruta.descripcion || 'Sin descripción'}</p>
+        <h3 className={styles.nombre}>{nombre}</h3>
+        <p className={styles.desc}>{descripcion || 'Sin descripción disponible.'}</p>
         <div className={styles.meta}>
-          <span>📍 {ruta.inicio} → {ruta.fin}</span>
-          <span>👣 {ruta.kilometros} km</span>
+          {inicio && <span>📍 {inicio} → {fin || 'Fin'}</span>}
+          <span>👣 {kilometros} km</span>
         </div>
-        <Badge variant={DIFFICULTY_VARIANT[ruta.dificultad]}>
-          {ruta.dificultad?.charAt(0).toUpperCase() + ruta.dificultad?.slice(1)}
+        <Badge variant={DIFFICULTY_VARIANT[difNormalizada] || 'default'}>
+          {difNormalizada.charAt(0).toUpperCase() + difNormalizada.slice(1)}
         </Badge>
       </div>
     </article>
