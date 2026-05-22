@@ -10,7 +10,6 @@ export default function MisPlanificacionesPage() {
   const [planificaciones, setPlanificaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // Redirección de seguridad centralizada sin falsos positivos de carga
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       navigate('/login');
@@ -18,7 +17,6 @@ export default function MisPlanificacionesPage() {
   }, [loading, isAuthenticated, navigate]);
 
   useEffect(() => {
-    // Esperamos a que el contexto termine de comprobar la sesión
     if (loading) return;
     if (!token) {
       setCargando(false);
@@ -44,6 +42,7 @@ export default function MisPlanificacionesPage() {
 
   const handleEliminar = async (id) => {
     if (!confirm('¿Seguro que quieres eliminar esta planificación?')) return;
+    
     try {
       const response = await fetch(`/api/planificaciones/${id}`, {
         method: 'DELETE',
@@ -52,11 +51,16 @@ export default function MisPlanificacionesPage() {
           'Accept': 'application/json'
         }
       });
+
       if (response.ok) {
-        setPlanificaciones(prev => prev.filter(p => p.id !== id));
+        setPlanificaciones(prevList => prevList.filter(p => p.id !== id));
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert(errorData.message || 'El servidor no ha podido procesar el borrado de la ruta.');
       }
     } catch (err) {
-      console.error("Error al eliminar:", err);
+      console.error("Error al eliminar la planificación:", err);
+      alert('Error de conexión: No se ha podido comunicar el borrado a RutaRaíz.');
     }
   };
 

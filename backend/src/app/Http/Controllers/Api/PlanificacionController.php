@@ -165,9 +165,12 @@ class PlanificacionController extends Controller
     public function destroy(string $id)
     {
         $planificacion = Planificacion::where('usuario_id', Auth::id())->findOrFail($id);
-
+        $planificacion->etapas()->delete();
         $planificacion->delete();
 
-        return response()->json(['message' => 'Planificación eliminada']);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Planificación y sus etapas eliminadas correctamente.'
+        ], 200);
     }
 }

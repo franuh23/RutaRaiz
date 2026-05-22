@@ -45,6 +45,9 @@ class PlanificacionController extends Controller
 
         $planificacion = Planificacion::create($data);
 
+        // Aseguramos que la relación con la ruta esté cargada antes de procesar
+        $planificacion->load('ruta');
+
         // Generar etapas
         $this->generarEtapas($planificacion);
 
@@ -56,7 +59,7 @@ class PlanificacionController extends Controller
      */
     public function show(Planificacion $planificacion)
     {
-         if ($planificacion->usuario_id !== Auth::id() && Auth::user()->rol !== 'admin') {
+        if ($planificacion->usuario_id !== Auth::id() && Auth::user()->rol !== 'admin') {
             abort(403);
         }
         $planificacion->load(['ruta', 'localizacionInicio', 'localizacionFin', 'etapas.localizacionInicio', 'etapas.localizacionFin']);
@@ -97,11 +100,19 @@ class PlanificacionController extends Controller
         if ($planificacion->usuario_id !== Auth::id() && Auth::user()->rol !== 'admin') {
             abort(403);
         }
+
+        // 🔥 CORRECCIÓN: Borrado manual en cascada de las etapas vinculadas antes de eliminar el padre
+        $planificacion->etapas()->delete();
+
+        // Ahora eliminamos la planificación de forma segura
         $planificacion->delete();
+
         return redirect()->route('planificaciones.index')->with('success', 'Planificación eliminada correctamente.');
     }
 
-    // Método para generar las etapas en planificación
+    /**
+     * Method to generate stages in planning.
+     */
     private function generarEtapas(Planificacion $planificacion)
     {
         // Obtener localizaciones de la ruta ordenadas por distancia

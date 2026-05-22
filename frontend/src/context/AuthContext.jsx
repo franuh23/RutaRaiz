@@ -7,7 +7,18 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem('token') || null);
     const [loading, setLoading] = useState(true);
 
-    // Validar si hay una sesión activa al cargar la app
+    // Función auxiliar para formatear el usuario y asegurar su avatar siempre
+    const formatearUsuario = (usuarioObjeto) => {
+        if (!usuarioObjeto) return null;
+        const copiaUsuario = { ...usuarioObjeto };
+        // Si el usuario tiene avatar en la BD pero no tiene la URL completa construida
+        if (copiaUsuario.avatar && !copiaUsuario.avatar_url) {
+            copiaUsuario.avatar_url = `/storage/${copiaUsuario.avatar}`;
+        }
+        return copiaUsuario;
+    };
+
+    // Validar si hay una sesión activa al arrancar la app
     useEffect(() => {
         const comprobarSesion = async () => {
             if (token) {
@@ -21,20 +32,20 @@ export const AuthProvider = ({ children }) => {
 
                     if (response.ok) {
                         const usuarioData = await response.json();
-                        setUser(usuarioData);
-                    } else {
-                        logout();
+                        // Guardamos asegurando el formateo del avatar
+                        setUser(formatearUsuario(usuarioData));
+                    } else if (response.status === 401) {
+                        ejecutarLimpiezaLocal();
                     }
                 } catch (error) {
-                    console.error("Error al validar la sesión:", error);
-                    logout();
+                    console.error("Error de conexión al validar la sesión:", error);
                 }
             }
             setLoading(false);
         };
 
         comprobarSesion();
-    }, [token]);
+    }, []);
 
     // Función para Iniciar Sesión
     const login = async (email, password) => {
@@ -53,18 +64,21 @@ export const AuthProvider = ({ children }) => {
             throw new Error(data.message || 'Error al iniciar sesión');
         }
 
-        const userObj = data.user;
-        if (userObj && userObj.avatar && !userObj.avatar_url) {
-            userObj.avatar_url = `/storage/${userObj.avatar}`;
-        }
+        // Formateamos el usuario antes de guardarlo en el estado global
+        const usuarioProcesado = formatearUsuario(data.user);
 
         localStorage.setItem('token', data.access_token);
         setToken(data.access_token);
-        setUser(userObj);
-        return userObj;
+        setUser(usuarioProcesado);
+        return usuarioProcesado;
     };
 
-    // Función para Cerrar Sesión
+    const ejecutarLimpiezaLocal = () => {
+        localStorage.removeItem('token');
+        setToken(null);
+        setUser(null);
+    };
+
     const logout = async () => {
         if (token) {
             try {
@@ -79,9 +93,7 @@ export const AuthProvider = ({ children }) => {
                 console.error("Error al cerrar sesión en el servidor:", error);
             }
         }
-        localStorage.removeItem('token');
-        setToken(null);
-        setUser(null);
+        ejecutarLimpiezaLocal();
     };
 
     return (

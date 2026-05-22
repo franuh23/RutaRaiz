@@ -77,7 +77,7 @@ export default function PlanificacionDetallePage() {
         {planificacion.etapas?.length > 0 ? (
           <div className="d-flex flex-column gap-2">
             {planificacion.etapas.map((etapa) => (
-              <EtapaCard key={etapa.id} etapa={etapa} />
+              <EtapaCard key={etapa.dia} etapa={etapa} />
             ))}
           </div>
         ) : (

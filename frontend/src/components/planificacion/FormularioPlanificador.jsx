@@ -1,10 +1,11 @@
 import React from 'react';
+import Button from '../ui/Button';
 
 export default function FormularioPlanificador({
-  rutas,
+  rutas = [],
   selectedRuta,
   setSelectedRuta,
-  localizaciones,
+  localizaciones = [],
   inicioId,
   setInicioId,
   finId,
@@ -16,14 +17,17 @@ export default function FormularioPlanificador({
   onSubmit,
   loading
 }) {
+  // 🔥 Capturamos el día de hoy en formato YYYY-MM-DD para bloquear el pasado
+  const hoy = new Date().toISOString().split('T')[0];
+
   return (
-    <div className="card shadow-sm border-0 p-4 mb-4" style={{ borderRadius: 'var(--radius-lg)' }}>
+    <div className="card shadow-sm border-0 p-4 mb-4 bg-white" style={{ borderRadius: 'var(--radius-lg)' }}>
       <form onSubmit={onSubmit}>
         <div className="row g-3">
           <div className="col-12 col-md-6">
-            <label className="form-label fw-bold text-dark">Ruta:</label>
+            <label className="form-label fw-bold text-dark small">Selecciona tu ruta:</label>
             <select className="form-select" value={selectedRuta} onChange={(e) => setSelectedRuta(e.target.value)} required>
-              <option value="">Selecciona una ruta</option>
+              <option value="">Selecciona una opción</option>
               {rutas.map(ruta => (
                 <option key={ruta.id} value={ruta.id}>{ruta.nombre}</option>
               ))}
@@ -31,9 +35,9 @@ export default function FormularioPlanificador({
           </div>
 
           <div className="col-12 col-md-6">
-            <label className="form-label fw-bold text-dark">Punto de inicio:</label>
+            <label className="form-label fw-bold text-dark small">Punto de inicio:</label>
             <select className="form-select" value={inicioId} onChange={(e) => setInicioId(e.target.value)} required disabled={!selectedRuta}>
-              <option value="">Selecciona inicio</option>
+              <option value="">Selecciona hito de salida</option>
               {localizaciones.map(loc => (
                 <option key={loc.id} value={loc.id}>
                   {loc.nombre} ({loc.distancia_desde_inicio} km)
@@ -43,9 +47,9 @@ export default function FormularioPlanificador({
           </div>
 
           <div className="col-12 col-md-6">
-            <label className="form-label fw-bold text-dark">Punto de fin (opcional):</label>
+            <label className="form-label fw-bold text-dark small">Punto de fin (opcional):</label>
             <select className="form-select" value={finId} onChange={(e) => setFinId(e.target.value)} disabled={!selectedRuta}>
-              <option value="">Hasta el final</option>
+              <option value="">Hasta el final del camino</option>
               {localizaciones.map(loc => (
                 <option key={loc.id} value={loc.id}>
                   {loc.nombre} ({loc.distancia_desde_inicio} km)
@@ -55,12 +59,12 @@ export default function FormularioPlanificador({
           </div>
 
           <div className="col-12 col-md-6">
-            <label className="form-label fw-bold text-dark">Kilómetros por día:</label>
+            <label className="form-label fw-bold text-dark small">Ritmo de marcha (Km / día):</label>
             <input
               type="number"
               className="form-control"
               value={kmDia}
-              onChange={(e) => setKmDia(e.target.value)}
+              onChange={(e) => setKmDia(Number(e.target.value) || '')}
               min="1"
               max="100"
               required
@@ -68,24 +72,26 @@ export default function FormularioPlanificador({
           </div>
 
           <div className="col-12">
-            <label className="form-label fw-bold text-dark">Fecha de inicio (necesaria para guardar):</label>
+            <label className="form-label fw-bold text-dark small">Fecha de inicio de caminata:</label>
             <input
               type="date"
               className="form-control"
               value={fechaInicio}
               onChange={(e) => setFechaInicio(e.target.value)}
+              min={hoy} // 👈 Control nativo: fechas anteriores a hoy se quedan deshabilitadas
             />
           </div>
         </div>
 
-        <button 
+        {/* Inyección de tu botón principal color tierra con sombras y transiciones */}
+        <Button 
           type="submit" 
-          className="btn text-white fw-bold w-100 mt-4 py-2" 
+          variant="primary" 
+          className="w-100 mt-4 py-2 text-white fw-bold"
           disabled={loading}
-          style={{ background: 'var(--verde-bosque)', borderRadius: 'var(--radius-md)' }}
         >
-          {loading ? 'Calculando...' : 'Calcular etapas'}
-        </button>
+          {loading ? 'Calculando etapas del Camino...' : '👣 Calcular mi itinerario'}
+        </Button>
       </form>
     </div>
   );

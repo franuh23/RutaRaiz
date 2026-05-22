@@ -15,7 +15,7 @@ export default function PlanificadorPage() {
   const [mensajeGuardado, setMensajeGuardado] = useState('');
   const [localizaciones, setLocalizaciones] = useState([]);
 
-  // Estados inicializados con Lazy Initialization segura
+  // --- PERSISTENCIA: Inicializar estados desde localStorage ---
   const [selectedRuta, setSelectedRuta] = useState(() => localStorage.getItem('rr_selectedRuta') || '');
   const [inicioId, setInicioId] = useState(() => localStorage.getItem('rr_inicioId') || '');
   const [finId, setFinId] = useState(() => localStorage.getItem('rr_finId') || '');
@@ -26,7 +26,7 @@ export default function PlanificadorPage() {
     return saved && saved !== "undefined" ? JSON.parse(saved) : null;
   });
 
-  // Un solo efecto centralizado para guardar la caché del formulario (así evitamos 6 re-renders simultáneos)
+  // --- PERSISTENCIA: Sincronizar cambios en localStorage ---
   useEffect(() => {
     localStorage.setItem('rr_selectedRuta', selectedRuta);
     localStorage.setItem('rr_inicioId', inicioId);
@@ -40,30 +40,53 @@ export default function PlanificadorPage() {
     }
   }, [selectedRuta, inicioId, finId, kmDia, fechaInicio, etapas]);
 
+  // Cargar lista de rutas inicial (Ya vienen con sus localizaciones acopladas de Laravel)
   useEffect(() => {
     fetch('/api/rutas')
       .then(res => res.json())
-      .then(data => setRutas(data.data || []))
+      .then(data => {
+        const rutasData = data.data || [];
+        setRutas(rutasData);
+
+        // 💡 SALVAVIDAS DE PERSISTENCIA: Si al recargar la página ya había una ruta seleccionada
+        // en el LocalStorage, buscamos sus localizaciones inmediatamente en memoria.
+        if (selectedRuta) {
+          const rutaMatch = rutasData.find(r => String(r.id) === String(selectedRuta));
+          if (rutaMatch) {
+            setLocalizaciones(rutaMatch.localizaciones || []);
+          }
+        }
+      })
       .catch(err => console.error("Error cargando rutas base:", err));
   }, []);
 
-  useEffect(() => {
-    if (selectedRuta) {
-      fetch(`/api/rutas/${selectedRuta}`)
-        .then(res => res.json())
-        .then(data => {
-          setLocalizaciones(data.data.localizaciones || []);
-          if (localStorage.getItem('rr_selectedRuta') !== selectedRuta) {
-            setInicioId('');
-            setFinId('');
-            setEtapas(null);
-          }
-        })
-        .catch(err => console.error("Error cargando mapa de hitos:", err));
+  // 🔥 EL CAMBIO CLAVE: Sincronizar localizaciones al vuelo sin peticiones HTTP
+  const handleSelectedRutaChange = (nuevaRutaId) => {
+    setSelectedRuta(nuevaRutaId);
+
+    if (nuevaRutaId) {
+      // Buscamos la ruta elegida directamente en el array que ya descargamos en memoria
+      const rutaMatch = rutas.find(r => String(r.id) === String(nuevaRutaId));
+
+      if (rutaMatch) {
+        setLocalizaciones(rutaMatch.localizaciones || []);
+      } else {
+        setLocalizaciones([]);
+      }
+
+      // Si la ruta cambia de verdad respecto a la guardada, reseteamos selectores dependientes
+      if (localStorage.getItem('rr_selectedRuta') !== nuevaRutaId) {
+        setInicioId('');
+        setFinId('');
+        setEtapas(null);
+      }
     } else {
       setLocalizaciones([]);
+      setInicioId('');
+      setFinId('');
+      setEtapas(null);
     }
-  }, [selectedRuta]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,10 +101,10 @@ export default function PlanificadorPage() {
       if (response.ok) {
         setEtapas(data);
       } else {
-        setError(data.error || 'Error al procesar el algoritmo de etapas');
+        setError(data.error || 'Error al planificar');
       }
     } catch (err) {
-      setError('Error en la comunicación con el servidor de mapas.');
+      setError('Error de conexión');
     } finally {
       setLoading(false);
     }
@@ -92,12 +115,19 @@ export default function PlanificadorPage() {
       navigate('/login');
       return;
     }
-    if (!fechaInicio) {
-      setError('Indica una fecha de inicio para guardar la planificación');
+
+    // 1. CONTROL ANTES DE NADA: Bloqueo inmediato en el primer milisegundo si falta la fecha
+    if (!fechaInicio || fechaInicio.trim() === '') {
+      setError('Indica una fecha de inicio válida para poder guardar la planificación en tu perfil.');
+      // Hacemos scroll hacia arriba para que el usuario vea el cartel rojo de Bootstrap perfectamente
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
+
     setGuardando(true);
     setError('');
+    setMensajeGuardado('');
+
     try {
       const response = await fetch('/api/planificaciones', {
         method: 'POST',
@@ -114,15 +144,20 @@ export default function PlanificadorPage() {
           km_dia: kmDia
         })
       });
+
       const data = await response.json();
+
       if (response.ok) {
         setMensajeGuardado('¡Planificación guardada correctamente!');
+        // Limpiamos los datos del formulario para dejar la mesa de trabajo limpia
         handleLimpiarCache();
       } else {
-        setError(data.message || 'Error al archivar la ruta');
+        // Si Laravel devuelve fallos de validación (422), los pintamos en el cuadro rojo
+        setError(data.message || data.error || 'Error al guardar la ruta.');
       }
     } catch (err) {
-      setError('Error de red al consolidar la información.');
+      console.error("Error de red al guardar:", err);
+      setError('Error de conexión: El servidor no ha respondido a la petición de guardado.');
     } finally {
       setGuardando(false);
     }
@@ -137,7 +172,15 @@ export default function PlanificadorPage() {
     setEtapas(null);
     setError('');
     setMensajeGuardado('');
-    localStorage.clear(); // O borras uno a uno si tienes tokens guardados fuera de rr_
+
+    // 💡 SELECCIÓN SELECTIVA: Borramos solo lo del planificador,
+    // NUNCA uses localStorage.clear() a secas porque te llevarías por delante el 'token' de sesión.
+    localStorage.removeItem('rr_selectedRuta');
+    localStorage.removeItem('rr_inicioId');
+    localStorage.removeItem('rr_finId');
+    localStorage.removeItem('rr_kmDia');
+    localStorage.removeItem('rr_fechaInicio');
+    localStorage.removeItem('rr_etapas');
   };
 
   return (
@@ -148,7 +191,7 @@ export default function PlanificadorPage() {
         </h1>
         {(selectedRuta || etapas) && (
           <button className="btn btn-sm btn-outline-secondary px-3" onClick={handleLimpiarCache} style={{ borderRadius: 'var(--radius-md)' }}>
-            实时 🧹 Limpiar Formulario
+            🧹 Limpiar Formulario
           </button>
         )}
       </div>
@@ -156,7 +199,7 @@ export default function PlanificadorPage() {
       <FormularioPlanificador
         rutas={rutas}
         selectedRuta={selectedRuta}
-        setSelectedRuta={setSelectedRuta}
+        setSelectedRuta={handleSelectedRutaChange} // 👈 Pasamos nuestra nueva función optimizada en memoria
         localizaciones={localizaciones}
         inicioId={inicioId}
         setInicioId={setInicioId}
