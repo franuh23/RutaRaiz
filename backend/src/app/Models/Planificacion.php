@@ -24,6 +24,7 @@ class Planificacion extends Model
         'fecha_inicio',
         'km_dia',
         'dias_totales',
+        'is_public',
         'activo',
     ];
 
@@ -38,6 +39,7 @@ class Planificacion extends Model
     {
         return [
             'activo' => 'boolean',
+            'is_public'=> 'boolean',
             'fecha_inicio' => 'date',
             'km_dia' => 'decimal:2',
             'dias_totales' => 'integer',
@@ -72,5 +74,10 @@ class Planificacion extends Model
     // Relación, tiene muchas etapas
     public function etapas() {
         return $this->hasMany(Etapa::class);
+    }
+
+    // Relación, tiene muchos likes
+    public function likes() {
+        return $this->hasMany(PlanificacionLike::class, 'planificacion_id');
     }
 }

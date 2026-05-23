@@ -49,6 +49,12 @@ export default function Navbar() {
                 <Link to="/mis-planificaciones" className="nav-link">Mis Planificaciones</Link>
               </li>
             )}
+            {/* 🎒 NUEVA PESTAÑA: Comunidad accesible para usuarios logueados */}
+            {isAuthenticated && (
+              <li className="nav-item">
+                <Link to="/comunidad" className="nav-link" style={{ fontWeight: '600' }}>Comunidad</Link>
+              </li>
+            )}
             {isAuthenticated && user?.rol === 'admin' && (
               <li className="nav-item">
                 <Link to="/admin" className="nav-link text-danger fw-bold">Panel Admin</Link>

@@ -13,6 +13,7 @@ import PlanificacionDetallePage from './pages/PlanificacionDetallePage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import PerfilPage from './pages/PerfilPage';
 import AlojamientoDetailPage from './pages/AlojamientoDetailPage';
+import ComunidadPage from './pages/ComunidadPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 export default function App() {
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/mis-planificaciones" element={<ProtectedRoute><MisPlanificacionesPage /></ProtectedRoute>} />
           <Route path="/mis-planificaciones/:id" element={<ProtectedRoute><PlanificacionDetallePage /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />
+          <Route path="/comunidad" element={<ComunidadPage />} />
 
           {/* Rutas Protegidas de Administración: Solo rol 'admin' */}
           <Route 

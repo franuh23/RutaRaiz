@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\RutaController;
 use App\Http\Controllers\Api\LocalizacionController;
 use App\Http\Controllers\Api\AlojamientoController;
 use App\Http\Controllers\Api\PlanificacionController;
+use App\Http\Controllers\Api\ComunidadController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TestController;
 
@@ -33,6 +34,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Gestión de planificaciones del usuario
     Route::apiResource('planificaciones', PlanificacionController::class)->only(['index', 'show', 'store', 'destroy']);
+    Route::get('/planificaciones/{id}/pdf', [PlanificacionController::class, 'exportarPdf']);
+    Route::get('/planificaciones/{id}/excel', [PlanificacionController::class, 'exportarExcel']);
+
+    // Rutas de la Red Social de la Comunidad (Protegidas)
+    Route::get('/comunidad/planificaciones', [ComunidadController::class, 'index']);
+    Route::post('/comunidad/planificaciones/{id}/like', [ComunidadController::class, 'toggleLike']);
+    Route::post('/comunidad/planificaciones/{id}/clonar', [ComunidadController::class, 'clonar']);
 
     // Retorno de datos de sesión activa
     Route::get('/usuario', function (Request $request) {
