@@ -49,7 +49,7 @@ export default function Navbar() {
                 <Link to="/mis-planificaciones" className="nav-link">Mis Planificaciones</Link>
               </li>
             )}
-            {/* 🎒 NUEVA PESTAÑA: Comunidad accesible para usuarios logueados */}
+            {/* Pestaña comunidad */}
             {isAuthenticated && (
               <li className="nav-item">
                 <Link to="/comunidad" className="nav-link" style={{ fontWeight: '600' }}>Comunidad</Link>

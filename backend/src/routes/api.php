@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Gestión de planificaciones del usuario
     Route::apiResource('planificaciones', PlanificacionController::class)->only(['index', 'show', 'store', 'destroy']);
+    Route::put('/planificaciones/{id}', [PlanificacionController::class, 'update']);
     Route::get('/planificaciones/{id}/pdf', [PlanificacionController::class, 'exportarPdf']);
     Route::get('/planificaciones/{id}/excel', [PlanificacionController::class, 'exportarExcel']);
 

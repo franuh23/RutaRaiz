@@ -165,6 +165,13 @@ class PlanificacionController extends Controller
             'is_public' => 'required|boolean'
         ]);
 
+        if ($request->is_public && $planificacion->original_id !== null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No puedes publicar en la comunidad una planificación que has clonado de otro peregrino.'
+            ], 403);
+        }
+
         $planificacion->update([
             'is_public' => $request->is_public
         ]);

@@ -96,7 +96,8 @@ class ComunidadController extends Controller
         // ⚡ TRUCO REPLICATE DE LARAVEL: Duplica el objeto en memoria conservando las propiedades
         $clon = $original->replicate();
         $clon->usuario_id = $usuarioId; // Cambiamos el dueño al usuario logueado
-        $clon->is_public = false;       // Nace siendo una copia privada del usuario
+        $clon->is_public = false; // Nace siendo una copia privada del usuario
+        $clon->original_id = $original->id;
         $clon->save();
 
         // Duplicamos en cascada cada una de las etapas originales asociándolas al nuevo clon

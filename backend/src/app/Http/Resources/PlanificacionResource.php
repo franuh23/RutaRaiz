@@ -28,6 +28,8 @@ class PlanificacionResource extends JsonResource
             'km_dia' => $this->km_dia,
             'dias_totales' => $this->dias_totales,
             'activo' => $this->activo,
+            'is_public' => (bool) $this->is_public,
+            'es_clonada' => $this->original_id !== null,
             'etapas' => EtapaResource::collection($this->whenLoaded('etapas')),
             'comentarios' => ComentarioPlanificacionResource::collection($this->whenLoaded('comentarios')),
             'created_at' => $this->created_at,

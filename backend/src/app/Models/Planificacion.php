@@ -26,6 +26,7 @@ class Planificacion extends Model
         'dias_totales',
         'is_public',
         'activo',
+        'original_id',
     ];
 
     protected $table = 'planificacion';
