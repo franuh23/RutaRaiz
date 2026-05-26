@@ -14,7 +14,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Peticiones concurrentes a tus endpoints de Laravel
     Promise.all([
       fetch('/api/rutas').then(res => res.json()),
       fetch('/api/localizaciones').then(res => res.json()),
@@ -24,12 +23,10 @@ export default function HomePage() {
         const todasLasRutas = rutasData.data || [];
         setRutasTotales(todasLasRutas);
 
-        // Filtramos tus 3 rutas reales preferidas para el escaparate
-        const nombresDeseados = ['Camino Primitivo', 'Camino de Santiago Frances', 'Camino del Norte'];
-        const filtradas = todasLasRutas.filter(ruta => nombresDeseados.includes(ruta.nombre));
+        const idsDeseados = [1, 12, 13];
+        const filtradas = todasLasRutas.filter(ruta => idsDeseados.includes(Number(ruta.id)));
+        
         setRutasDestacadas(filtradas);
-
-        // Guardamos los contadores totales reales basados en la base de datos
         setTotalLocs((locsData.data || []).length);
         setTotalAlojs((alojsData.data || []).length);
         setLoading(false);
@@ -50,26 +47,20 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Sección Hero: Bienvenida principal compacta */}
+      {/* 🏔️ 1. Hero Section: Ya ocupa todo el ancho de forma nativa */}
       <HeroSection onPlanificar={() => navigate('/planificador')} />
       
-      <Container>
-        {/* Escaparate Dinámico: Solo tus 3 rutas reales */}
-        {rutasDestacadas.length > 0 && (
-          <div className="py-3">
-            <RoutesPreviewSection rutas={rutasDestacadas} />
-          </div>
-        )}
-        
-        {/* Estado General de la Red: Panel de métricas 100% reales sin CSS extra */}
-        <div className="py-2">
-          <StatsGeneralSection 
-            rutas={rutasTotales} 
-            totalLocalizaciones={totalLocs} 
-            totalAlojamientos={totalAlojs} 
-          />
-        </div>
-      </Container>
+      {/* 🧭 2. Escaparate de Rutas: Lo sacamos del Container global para que su fondo crema ocupe el 100% del ancho */}
+      {rutasDestacadas.length > 0 && (
+        <RoutesPreviewSection rutas={rutasDestacadas} />
+      )}
+      
+      {/* 📊 3. Estadísticas Generales: También fuera, creando una banda infinita e independiente */}
+      <StatsGeneralSection 
+        rutas={rutasTotales} 
+        totalLocalizaciones={totalLocs} 
+        totalAlojamientos={totalAlojs} 
+      />
     </>
   );
 }
