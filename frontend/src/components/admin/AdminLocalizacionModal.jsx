@@ -2,14 +2,30 @@ import React, { useState, useEffect } from 'react';
 
 export default function AdminLocalizacionModal({ isOpen, onClose, onSave, locEditando, rutas }) {
   const [form, setForm] = useState({
-    ruta_id: '', nombre: '', descripcion: '', distancia_desde_inicio: '', imagen: ''
+    ruta_id: '', 
+    nombre: '', 
+    descripcion: '', 
+    distancia_desde_inicio: '', 
+    distancia_desde_fin: '' // 👈 Añadido para que cuadre con tu BD
   });
 
   useEffect(() => {
     if (locEditando) {
-      setForm(locEditando);
+      setForm({
+        ruta_id: locEditando.ruta_id || '',
+        nombre: locEditando.nombre || '',
+        descripcion: locEditando.descripcion || '',
+        distancia_desde_inicio: locEditando.distancia_desde_inicio || '',
+        distancia_desde_fin: locEditando.distancia_desde_fin || ''
+      });
     } else {
-      setForm({ ruta_id: rutas[0]?.id || '', nombre: '', descripcion: '', distancia_desde_inicio: '', imagen: '' });
+      setForm({ 
+        ruta_id: rutas[0]?.id || '', 
+        nombre: '', 
+        descripcion: '', 
+        distancia_desde_inicio: '', 
+        distancia_desde_fin: '' 
+      });
     }
   }, [locEditando, isOpen, rutas]);
 
@@ -21,11 +37,17 @@ export default function AdminLocalizacionModal({ isOpen, onClose, onSave, locEdi
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(form);
+    // Convertimos las distancias a números con decimales antes de enviarlas
+    const dataToSend = {
+      ...form,
+      distancia_desde_inicio: parseFloat(form.distancia_desde_inicio),
+      distancia_desde_fin: parseFloat(form.distancia_desde_fin)
+    };
+    onSave(dataToSend);
   };
 
   return (
-    <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
       <div className="modal-dialog modal-dialog-centered modal-lg">
         <div className="modal-content border-0 shadow" style={{ borderRadius: 'var(--radius-lg)' }}>
           <div className="modal-header border-0 bg-light">
@@ -50,13 +72,20 @@ export default function AdminLocalizacionModal({ isOpen, onClose, onSave, locEdi
                   <label className="form-label fw-semibold small">Nombre del Lugar</label>
                   <input type="text" name="nombre" className="form-control" value={form.nombre} onChange={handleChange} required style={{ borderRadius: 'var(--radius-md)' }} />
                 </div>
-                <div className="col-12">
-                  <label className="form-label fw-semibold small">Descripción del Punto / Servicios</label>
-                  <textarea name="descripcion" className="form-control" rows="3" value={form.descripcion} onChange={handleChange} required style={{ borderRadius: 'var(--radius-md)' }}></textarea>
+                
+                {/* Nuevos campos de distancias lado a lado */}
+                <div className="col-12 col-sm-6">
+                  <label className="form-label fw-semibold small">Km desde el inicio</label>
+                  <input type="number" step="0.1" name="distancia_desde_inicio" className="form-control" value={form.distancia_desde_inicio} onChange={handleChange} required placeholder="Ej: 12.5" style={{ borderRadius: 'var(--radius-md)' }} />
                 </div>
+                <div className="col-12 col-sm-6">
+                  <label className="form-label fw-semibold small">Km hasta el final</label>
+                  <input type="number" step="0.1" name="distancia_desde_fin" className="form-control" value={form.distancia_desde_fin} onChange={handleChange} required placeholder="Ej: 100.2" style={{ borderRadius: 'var(--radius-md)' }} />
+                </div>
+
                 <div className="col-12">
-                  <label className="form-label fw-semibold small">Kilómetro Acumulado (Distancia desde inicio de ruta)</label>
-                  <input type="number" step="0.1" name="distancia_desde_inicio" className="form-control" value={form.distancia_desde_inicio} onChange={handleChange} required style={{ borderRadius: 'var(--radius-md)' }} />
+                  <label className="form-label fw-semibold small">Descripción del Punto / Servicios (Opcional)</label>
+                  <textarea name="descripcion" className="form-control" rows="3" value={form.descripcion} onChange={handleChange} style={{ borderRadius: 'var(--radius-md)' }}></textarea>
                 </div>
               </div>
             </div>

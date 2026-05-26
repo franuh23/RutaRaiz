@@ -23,11 +23,11 @@ class RutaPut extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre' => 'required|max:150',
-            'descripcion' => 'nullable',
+            'nombre' => 'required|string|max:150',
+            'descripcion' => 'nullable|string',
             'dificultad' => 'required|in:baja,media,alta',
-            'inicio' => 'required|max:100',
-            'fin' => 'required|max:100',
+            'inicio' => 'required|string|max:100',
+            'fin' => 'required|string|max:100',
             'kilometros' => 'required|numeric|min:0',
             'imagen' => 'nullable|string|max:1000',
         ];

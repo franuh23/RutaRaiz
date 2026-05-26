@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Api\RutaController;
+use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\LocalizacionController;
 use App\Http\Controllers\Api\AlojamientoController;
 use App\Http\Controllers\Api\PlanificacionController;
@@ -72,4 +73,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/alojamientos', [AlojamientoController::class, 'store']);
     Route::put('/alojamientos/{id}', [AlojamientoController::class, 'update']);
     Route::delete('/alojamientos/{id}', [AlojamientoController::class, 'destroy']);
+
+    // Gestión de Usuarios Globales (Admin API)
+    Route::get('/usuarios', [UsuarioController::class, 'index']);
+    Route::put('/usuarios/{id}', [UsuarioController::class, 'update']);
+    Route::delete('/usuarios/{id}', [UsuarioController::class, 'destroy']);
 });

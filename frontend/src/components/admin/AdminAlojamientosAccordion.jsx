@@ -33,7 +33,6 @@ export default function AdminAlojamientosAccordion({ rutas, localizaciones, aloj
                   <p className="text-muted text-center m-0 py-2">Esta ruta no tiene puntos geográficos creados.</p>
                 ) : (
                   locsDeEstaRuta.map((loc) => {
-                    // Filtrar alojamientos que pertenecen a esta localización concreta
                     const alojDeEstaLoc = alojamientos.filter(aloj => aloj.localizacion_id === loc.id);
                     const isLocOpen = locAbierta === loc.id;
 
@@ -61,9 +60,15 @@ export default function AdminAlojamientosAccordion({ rutas, localizaciones, aloj
                             ) : (
                               <div className="table-responsive">
                                 <table className="table table-hover m-0 table-sm align-middle bg-white">
+                                  {/* 🔄 MODIFICADO: Cabecera sincronizada con las columnas reales */}
                                   <thead className="table-light text-uppercase x-small text-muted" style={{ fontSize: '0.75rem' }}>
                                     <tr>
-                                      <th className="ps-3">ID</th><th>Establecimiento</th><th>Tipo</th><th>Precio Noche</th><th>Capacidad</th><th className="text-end pe-3">Acciones</th>
+                                      <th className="ps-3" style={{ width: '80px' }}>ID</th>
+                                      <th>Establecimiento</th>
+                                      <th style={{ width: '120px' }}>Tipo</th>
+                                      <th>Canal Contacto</th>
+                                      <th>Ubicación / Enlace</th>
+                                      <th className="text-end pe-3" style={{ width: '180px' }}>Acciones</th>
                                     </tr>
                                   </thead>
                                   <tbody>

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Ruta;
 use App\Http\Resources\RutaResource;
 use App\Http\Requests\PlanificarRequest;
+use App\Http\Requests\RutaPost; // 🎒 Importamos tu Request real de creación
+use App\Http\Requests\RutaPut;  // 📝 Importamos tu Request real de edición
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,22 +25,14 @@ class RutaController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(RutaPost $request) // 🔌 Conectamos tu Form Request corregido
     {
         if (Auth::user()->rol !== 'admin') {
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'required|string',
-            'distancia_total' => 'required|numeric|min:0',
-            'tiempo_estimado' => 'required|string',
-            'dificultad' => 'required|string|max:50',
-            'imagen' => 'nullable|string',
-        ]);
-
-        $ruta = Ruta::create($validated);
+        // Creamos la ruta usando directamente los datos limpios y validados (inicio, fin, kilometros, etc.)
+        $ruta = Ruta::create($request->validated());
 
         return response()->json([
             'message' => 'Ruta creada correctamente',
@@ -58,7 +52,7 @@ class RutaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(RutaPut $request, string $id) // 🔌 Conectamos tu Form Request corregido
     {
         if (Auth::user()->rol !== 'admin') {
             return response()->json(['message' => 'No autorizado'], 403);
@@ -66,16 +60,8 @@ class RutaController extends Controller
 
         $ruta = Ruta::findOrFail($id);
 
-        $validated = $request->validate([
-            'nombre' => 'sometimes|required|string|max:255',
-            'descripcion' => 'sometimes|required|string',
-            'distancia_total' => 'sometimes|required|numeric|min:0',
-            'tiempo_estimado' => 'sometimes|required|string',
-            'dificultad' => 'sometimes|required|string|max:50',
-            'imagen' => 'nullable|string',
-        ]);
-
-        $ruta->update($validated);
+        // Actualizamos con las reglas adaptadas del PUT (donde los campos pueden ser opcionales al editar)
+        $ruta->update($request->validated());
 
         return response()->json([
             'message' => 'Ruta actualizada correctamente',
@@ -101,8 +87,8 @@ class RutaController extends Controller
     }
 
     /**
-    * Calcula las etapas de una ruta según los parámetros del usuario incluyendo alojamientos.
-    */
+     * Calcula las etapas de una ruta según los parámetros del usuario incluyendo alojamientos.
+     */
     public function planificar(PlanificarRequest $request)
     {
         // Cargamos las localizaciones con sus respectivos alojamientos para tenerlos listos

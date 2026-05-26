@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
+    // Registro de usuarios públicos
     public function register(Request $request)
     {
         $request->validate([
@@ -28,7 +29,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'rol' => 'usuario',
-            'activo' => true,
+            'activo' => true, // Por defecto entran activos
         ]);
 
         $token = $usuario->createToken('auth_token')->plainTextToken;
@@ -40,7 +41,7 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // Inicio de sesión
+    // Inicio de sesión Blindado contra Baneos 🔒
     public function login(Request $request)
     {
         $request->validate([
@@ -48,13 +49,24 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
+        // 1. Comprobamos si las credenciales de email y contraseña coinciden
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'message' => 'Credenciales inválidas'
             ], 401);
         }
 
+        // 2. Buscamos el registro real del usuario en la base de datos de Neon
         $usuario = Usuario::where('email', $request->email)->firstOrFail();
+
+        // 3. 🚨 EL CERROJO: Si el admin lo marcó como inactivo/baneado, frenamos el login
+        if (!$usuario->activo) {
+            return response()->json([
+                'message' => 'Tu cuenta en RutaRaíz ha sido suspendida temporal o permanentemente por los administradores.'
+            ], 403); // Devolvemos un código 403 Forbidden (Acceso prohibido)
+        }
+
+        // 4. Si está activo, permitimos la generación de token normal
         $token = $usuario->createToken('auth_token')->plainTextToken;
 
         return response()->json([
