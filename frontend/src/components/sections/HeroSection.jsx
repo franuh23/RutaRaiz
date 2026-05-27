@@ -22,7 +22,7 @@ export default function HeroSection({ onPlanificar }) {
           </h1>
 
           <p className={styles.subtitulo}>
-            Introduce tus días disponibles, ritmo y destino.
+            Introduce tu fecha, ritmo y destino.
             Te generamos la ruta perfecta adaptada a ti.
           </p>
 
@@ -48,7 +48,7 @@ export default function HeroSection({ onPlanificar }) {
           <div className={styles.stats}>
             {[
               { valor: 'Primitivo', label: 'Camino Estrella' },
-              { valor: '100%', label: 'Albergues Reales' },
+              { valor: '100%', label: 'Localizaciones Reales' },
               { valor: 'A medida', label: 'Etapas Diarias' },
             ].map((s) => (
               <div key={s.label} className={styles.stat}>

@@ -149,14 +149,13 @@ export default function AdminDashboardPage() {
     } catch (err) { console.error(err); }
   };
 
-  if (loading) return <Container><div className="text-center py-5 text-muted">Cargando panel relacional...</div></Container>;
+  if (loading) return <Container><div className="text-center py-5 text-muted">Cargando panel de administración...</div></Container>;
 
   return (
     <Container>
       <div className="my-4 p-4 bg-light rounded shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
           <h1 className="h3 m-0 text-dark fw-bold">Panel de Administración</h1>
-          <p className="text-muted small m-0">Mantenimiento global de entidades relacionales</p>
         </div>
         <div>
           {activeTab === 'rutas' && (

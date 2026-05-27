@@ -59,7 +59,7 @@ export default function RouteCard({ ruta }) {
       {/* 📝 Contenido Informativo */}
       <div className={styles.body}>
         <div className={styles.meta}>
-          <span className="fw-bold" style={{ color: 'var(--verde-medio)' }}>🗺️ Ruta #{id}</span>
+          <span className="fw-bold" style={{ color: 'var(--verde-medio)' }}>🗺️Ruta popular</span>
           <span className="fw-bold font-monospace text-dark">👣 {Number(kilometros).toLocaleString('es-ES')} km</span>
         </div>
         
