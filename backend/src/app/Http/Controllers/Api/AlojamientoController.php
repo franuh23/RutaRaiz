@@ -44,7 +44,13 @@ class AlojamientoController extends Controller
      */
     public function show(string $id)
     {
-        $alojamiento = Alojamiento::with(['comentarios.usuario'])->findOrFail($id);
+        // Cargamos el alojamiento trayendo SOLO los comentarios que sigan activos
+        $alojamiento = Alojamiento::with([
+            'comentarios' => function ($query) {
+                $query->where('activo', true)->orderBy('created_at', 'desc')->with('usuario');
+            }
+        ])->findOrFail($id);
+
         return new AlojamientoResource($alojamiento);
     }
 

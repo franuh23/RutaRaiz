@@ -17,7 +17,9 @@ class ComentarioAlojamientoResource extends JsonResource
         return [
             'id' => $this->id,
             'usuario_id' => $this->usuario_id,
-            'usuario_nick' => $this->usuario->nick ?? null,
+            'usuario' => [
+                'nick' => $this->usuario->nick ?? 'Peregrino'
+            ],
             'texto' => $this->texto,
             'fecha' => $this->fecha?->format('Y-m-d H:i:s'),
             'activo' => $this->activo,

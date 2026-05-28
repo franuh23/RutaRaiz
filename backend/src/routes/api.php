@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\RutaController;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\LocalizacionController;
 use App\Http\Controllers\Api\AlojamientoController;
+use App\Http\Controllers\Api\ComentarioAlojamientoController;
 use App\Http\Controllers\Api\PlanificacionController;
 use App\Http\Controllers\Api\ComunidadController;
 use App\Http\Controllers\Api\AuthController;
@@ -60,6 +61,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Actualizar perfil
     Route::post('/usuario/update', [AuthController::class, 'updatePerfil']);
+
+    // Comentarios
+    Route::post('/comentarios-alojamiento', [ComentarioAlojamientoController::class, 'store']);
+    Route::delete('/comentarios-alojamiento/{id}', [ComentarioAlojamientoController::class, 'destroy']);
 
     // Escritura de recursos globales (Restringido en Frontend/Backend para rol 'admin')
     Route::post('/rutas', [RutaController::class, 'store']);

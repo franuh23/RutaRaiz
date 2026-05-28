@@ -33,8 +33,13 @@ export default function PerfilForm({ user, onUpdate }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setForm({ ...form, avatar: file });
       setPreview(URL.createObjectURL(file));
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm({ ...form, avatar: reader.result });
+      };
+      reader.readAsDataURL(file);
     }
   };
 

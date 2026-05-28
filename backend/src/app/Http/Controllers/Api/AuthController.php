@@ -56,10 +56,10 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // 2. Buscamos el registro real del usuario en la base de datos de Neon
+        // Buscamos el registro real del usuario en la base de datos de Neon
         $usuario = Usuario::where('email', $request->email)->firstOrFail();
 
-        // 3. 🚨 EL CERROJO: Si el admin lo marcó como inactivo/baneado, frenamos el login
+        // EL CERROJO: Si el admin lo marcó como inactivo/baneado, frenamos el login
         if (!$usuario->activo) {
             return response()->json([
                 'message' => 'Tu cuenta en RutaRaíz ha sido suspendida temporal o permanentemente por los administradores.'
@@ -97,7 +97,7 @@ class AuthController extends Controller
             'nick' => 'required|string|max:255|unique:usuarios,nick,' . $usuario->id,
             'email' => 'required|string|email|max:255|unique:usuarios,email,' . $usuario->id,
             'password' => 'nullable|string|min:6|confirmed',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'avatar' => 'nullable|string', // Validamos como string porque viaja en Base64
         ]);
 
         $usuario->nombre = $request->nombre;
@@ -109,19 +109,15 @@ class AuthController extends Controller
             $usuario->password = bcrypt($request->password);
         }
 
-        if ($request->hasFile('avatar')) {
-            if ($usuario->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($usuario->avatar)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($usuario->avatar);
-            }
-
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $usuario->avatar = $path;
+        // Si viene un nuevo Base64 en la petición, lo machacamos directo en Neon
+        if ($request->filled('avatar')) {
+            $usuario->avatar = $request->avatar;
         }
 
         $usuario->save();
 
         return response()->json([
-            'message' => 'Perfil actualizado con éxito',
+            'message' => 'Perfil actualizado con éxito en Neon',
             'user' => [
                 'id' => $usuario->id,
                 'nombre' => $usuario->nombre,
@@ -129,7 +125,7 @@ class AuthController extends Controller
                 'nick' => $usuario->nick,
                 'email' => $usuario->email,
                 'rol' => $usuario->rol,
-                'avatar_url' => $usuario->avatar ? asset('storage/' . $usuario->avatar) : null,
+                'avatar_url' => $usuario->avatar, // Devolvemos el Base64 tal cual. ¡React lo pinta directo!
             ]
         ]);
     }

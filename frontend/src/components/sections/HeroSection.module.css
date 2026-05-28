@@ -1,6 +1,5 @@
 .hero {
   position: relative;
-  /* Reducimos drásticamente los paddings para que no ocupe toda la pantalla */
   padding: 40px 0 35px;
   background: linear-gradient(135deg, rgba(30,58,15,0.96) 0%, rgba(45,90,27,0.92) 100%);
   overflow: hidden;
@@ -23,7 +22,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Bajamos el gap de 24px a 14px para juntar los elementos */
   gap: 14px;
 }
 
@@ -54,7 +52,6 @@
   margin-top: 4px;
 }
 
-/* Stats compactados */
 .stats {
   display: flex;
   gap: 32px;

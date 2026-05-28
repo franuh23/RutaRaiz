@@ -32,7 +32,7 @@ export default function AlojamientoDetailPage() {
   const handleEnviarComentario = async (texto) => {
     if (!texto.trim()) return;
     try {
-      const res = await fetch('/api/comentarios', {
+      const res = await fetch('/api/comentarios-alojamiento', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -44,11 +44,45 @@ export default function AlojamientoDetailPage() {
           texto: texto
         })
       });
+
+      const dataJson = await res.json();
+
       if (res.ok) {
-        cargarAlojamiento();
+        setAlojamiento(prev => ({
+          ...prev,
+          comentarios: [...(prev.comentarios || []), dataJson.data]
+        }));
+      } else {
+        alert(dataJson.message || 'Error al publicar el comentario');
       }
     } catch (err) {
       console.error('Error al publicar comentario:', err);
+    }
+  };
+
+  const handleBorrarComentario = async (comentarioId) => {
+    try {
+      const res = await fetch(`/api/comentarios-alojamiento/${comentarioId}`, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const dataJson = await res.json();
+
+      if (res.ok) {
+        // 🧼 Quitamos el comentario del estado en caliente para que desaparezca visualmente
+        setAlojamiento(prev => ({
+          ...prev,
+          comentarios: (prev.comentarios || []).filter(c => c.id !== comentarioId)
+        }));
+      } else {
+        alert(dataJson.message || 'No se pudo eliminar el comentario');
+      }
+    } catch (err) {
+      console.error('Error al borrar comentario:', err);
     }
   };
 
@@ -60,21 +94,23 @@ export default function AlojamientoDetailPage() {
       <div className="py-2">
         <AlojamientoFicha alojamiento={alofamiento} />
 
-        <AlojamientoComentarios 
-          comentarios={alofamiento.comentarios || []} 
-          onEnviarComentario={handleEnviarComentario} 
+        <AlojamientoComentarios
+          comentarios={alofamiento.comentarios || []}
+          onEnviarComentario={handleEnviarComentario}
+          onBorrarComentario={handleBorrarComentario}
+          currentUser={user}
         />
 
         <div className="d-flex gap-3 small mt-4 justify-content-end border-top pt-2">
           {user?.rol === 'admin' && (
-            <button 
+            <button
               className="btn btn-sm btn-link text-primary text-decoration-none fw-semibold"
               onClick={() => navigate('/admin')}
             >
               🛠️ Panel de Control
             </button>
           )}
-          <button 
+          <button
             className="btn btn-sm btn-outline-secondary px-3"
             onClick={() => navigate(-1)}
             style={{ borderRadius: 'var(--radius-md)' }}

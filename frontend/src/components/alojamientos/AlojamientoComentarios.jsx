@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 
-export default function AlojamientoComentarios({ comentarios = [], onEnviarComentario }) {
+export default function AlojamientoComentarios({ 
+  comentarios = [], 
+  onEnviarComentario, 
+  onBorrarComentario, // 👈 Nueva prop para manejar la acción de borrar
+  currentUser // 👈 Nueva prop para saber quién está logueado (pasa su ID y Rol)
+}) {
   const [nuevoComentario, setNuevoComentario] = useState('');
 
   const handleSubmit = (e) => {
@@ -20,15 +25,40 @@ export default function AlojamientoComentarios({ comentarios = [], onEnviarComen
         <p className="text-secondary mb-4 fs-5">Sin comentarios aún.</p>
       ) : (
         <div className="d-flex flex-column gap-3 mb-4">
-          {comentarios.map((c) => (
-            <div key={c.id} className="p-3 bg-light rounded" style={{ borderRadius: 'var(--radius-md)' }}>
-              <div className="d-flex justify-content-between mb-1 small text-muted">
-                <span className="fw-bold text-dark">👤 {c.usuario?.nick || 'Peregrino'}</span>
-                <span>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</span>
+          {comentarios.map((c) => {
+            // 🛡️ Comprobación de seguridad visual: ¿Es el autor o es administrador global?
+            const esAutor = currentUser && Number(c.usuario_id) === Number(currentUser.id);
+            const esAdmin = currentUser?.rol === 'admin';
+            const puedeBorrar = esAutor || esAdmin;
+
+            return (
+              <div key={c.id} className="p-3 bg-light rounded position-relative" style={{ borderRadius: 'var(--radius-md)' }}>
+                <div className="d-flex justify-content-between mb-1 small text-muted">
+                  <span className="fw-bold text-dark">👤 {c.usuario?.nick || 'Peregrino'}</span>
+                  <div className="d-flex align-items-center gap-2">
+                    <span>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</span>
+                    
+                    {/* 🗑️ Botón Papelera Condicional */}
+                    {puedeBorrar && (
+                      <button
+                        className="btn btn-sm text-danger p-0 border-0 bg-transparent ms-2"
+                        title="Eliminar comentario"
+                        onClick={() => {
+                          if (window.confirm('¿Seguro que quieres retirar este comentario?')) {
+                            onBorrarComentario(c.id);
+                          }
+                        }}
+                        style={{ cursor: 'pointer', fontSize: '0.9rem' }}
+                      >
+                        🗑️
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <p className="m-0 text-secondary pe-4" style={{ whiteSpace: 'pre-line' }}>{c.texto}</p>
               </div>
-              <p className="m-0 text-secondary">{c.texto}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
