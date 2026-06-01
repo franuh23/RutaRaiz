@@ -12,6 +12,7 @@ class Etapa extends Model
         'localizacion_inicio_id',
         'localizacion_fin_id',
         'distancia',
+        'completada',
     ];
 
     protected $table = 'etapas';

@@ -83,4 +83,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/usuarios', [UsuarioController::class, 'index']);
     Route::put('/usuarios/{id}', [UsuarioController::class, 'update']);
     Route::delete('/usuarios/{id}', [UsuarioController::class, 'destroy']);
+
+    // Seguimiento y Progreso del itinerario en tiempo real
+    Route::post('/planificaciones/{id}/empezar', [PlanificacionController::class, 'empezarRuta']);
+    Route::put('/planificaciones/{planificacionId}/etapas/{etapaId}/toggle', [PlanificacionController::class, 'toggleEtapa']);
+    Route::post('/planificaciones/{id}/parar', [PlanificacionController::class, 'pararRuta']);
 });

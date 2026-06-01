@@ -14,6 +14,7 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import PerfilPage from './pages/PerfilPage';
 import AlojamientoDetailPage from './pages/AlojamientoDetailPage';
 import ComunidadPage from './pages/ComunidadPage';
+import SeguimientoPage from './pages/SeguimientoPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 export default function App() {
@@ -34,6 +35,7 @@ export default function App() {
           {/* Rutas Protegidas: Cualquier usuario logueado */}
           <Route path="/mis-planificaciones" element={<ProtectedRoute><MisPlanificacionesPage /></ProtectedRoute>} />
           <Route path="/mis-planificaciones/:id" element={<ProtectedRoute><PlanificacionDetallePage /></ProtectedRoute>} />
+          <Route path="/seguimiento" element={<ProtectedRoute><SeguimientoPage /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />
           <Route path="/comunidad" element={<ComunidadPage />} />
 

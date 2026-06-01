@@ -22,6 +22,7 @@ class EtapaResource extends JsonResource
             'localizacion_fin_id' => $this->localizacion_fin_id,
             'localizacion_fin_nombre' => $this->localizacionFin->nombre ?? null,
             'distancia' => $this->distancia,
+            'completada' => (bool) $this->completada,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

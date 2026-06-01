@@ -38,7 +38,6 @@ class PlanificacionController extends Controller
             'km_dia' => 'required|numeric|min:1|max:100',
         ]);
 
-        // Calcular etapas igual que en RutaController@planificar
         $ruta = Ruta::with('localizaciones')->findOrFail($request->ruta_id);
         $localizaciones = $ruta->localizaciones->sortBy('distancia_desde_inicio');
 
@@ -46,9 +45,7 @@ class PlanificacionController extends Controller
         $finId = $request->localizacion_fin_id;
 
         $indiceInicio = $localizaciones->search(fn($loc) => $loc->id == $inicioId);
-        $indiceFin = $finId
-            ? $localizaciones->search(fn($loc) => $loc->id == $finId)
-            : $localizaciones->count() - 1;
+        $indiceFin = $finId ? $localizaciones->search(fn($loc) => $loc->id == $finId) : $localizaciones->count() - 1;
 
         if ($indiceInicio === false || $indiceFin === false || $indiceInicio >= $indiceFin) {
             return response()->json(['error' => 'Localizaciones no válidas'], 422);
@@ -61,8 +58,7 @@ class PlanificacionController extends Controller
         $inicioEtapa = $localizaciones[$indiceInicio];
 
         for ($i = $indiceInicio + 1; $i <= $indiceFin; $i++) {
-            $distanciaTramo = $localizaciones[$i]->distancia_desde_inicio
-                - $localizaciones[$i - 1]->distancia_desde_inicio;
+            $distanciaTramo = $localizaciones[$i]->distancia_desde_inicio - $localizaciones[$i - 1]->distancia_desde_inicio;
 
             if ($kmAcumulados + $distanciaTramo > $kmDia && $kmAcumulados > 0) {
                 $etapasCalculadas[] = [
@@ -79,7 +75,6 @@ class PlanificacionController extends Controller
             }
         }
 
-        // Última etapa
         if ($kmAcumulados > 0) {
             $etapasCalculadas[] = [
                 'dia' => $dia,
@@ -89,7 +84,6 @@ class PlanificacionController extends Controller
             ];
         }
 
-        // Guardar planificación
         $planificacion = Planificacion::create([
             'usuario_id' => Auth::id(),
             'ruta_id' => $request->ruta_id,
@@ -101,12 +95,10 @@ class PlanificacionController extends Controller
             'activo' => true,
         ]);
 
-        // Guardar etapas
         foreach ($etapasCalculadas as $etapa) {
             $planificacion->etapas()->create($etapa);
         }
 
-        // Devolver con etapas cargadas
         $planificacion->load(['ruta', 'etapas.localizacionInicio', 'etapas.localizacionFin']);
         return new PlanificacionResource($planificacion);
     }
@@ -116,39 +108,38 @@ class PlanificacionController extends Controller
      */
     public function show(string $id)
     {
-        // Cargamos la planificación directamente con las etapas guardadas en la BD
-        // y sus respectivas localizaciones de inicio y fin (Eager Loading)
         $planificacion = Planificacion::with([
             'ruta',
-            'etapas.localizacionInicio.alojamientos',
+            'etapas' => function($query) {
+                $query->orderBy('dia', 'asc'); // 🚀 REPARADO: Fijamos el orden SQL para que no se muevan de sitio
+            },
+            'etapas.localizacionInicio',
             'etapas.localizacionFin.alojamientos'
         ])
-            ->where('usuario_id', Auth::id())
-            ->findOrFail($id);
+        ->where('usuario_id', Auth::id())
+        ->findOrFail($id);
 
-        // Formateamos las etapas leyendo directamente de las tablas de la BD
         $etapasFormateadas = $planificacion->etapas->map(function ($etapa) {
             return [
+                'id' => $etapa->id,
                 'dia' => $etapa->dia,
-                'inicio' => $etapa->localizacionInicio->nombre,
-                'fin' => $etapa->localizacionFin->nombre,
+                'inicio' => $etapa->localizacionInicio->nombre ?? 'Inicio',
+                'fin' => $etapa->localizacionFin->nombre ?? 'Fin',
                 'distancia' => round($etapa->distancia, 1),
-                // Agrupamos los alojamientos disponibles en el punto de destino de la etapa
+                'completada' => (bool) $etapa->completada,
                 'alojamientos' => $etapa->localizacionFin->alojamientos ?? []
             ];
-        });
-
-        // Calculamos los kilómetros totales sumando lo que se guardó físicamente en las etapas
-        $totalKm = $planificacion->etapas->sum('distancia');
+        })->values()->all(); // Aseguramos colección limpia de índices
 
         return response()->json([
             'data' => [
                 'id' => $planificacion->id,
                 'fecha_inicio' => $planificacion->fecha_inicio,
                 'km_dia' => $planificacion->km_dia,
-                'ruta_nombre' => $planificacion->ruta->nombre,
-                'total_km' => round($totalKm, 1),
+                'ruta_nombre' => $planificacion->ruta->nombre ?? 'Camino',
+                'total_km' => round($planificacion->etapas->sum('distancia'), 1),
                 'dias_totales' => $planificacion->dias_totales,
+                'en_curso' => (bool) $planificacion->en_curso,
                 'etapas' => $etapasFormateadas
             ]
         ]);
@@ -198,26 +189,13 @@ class PlanificacionController extends Controller
         ], 200);
     }
 
-    /**
-     * Summary of exportarPdf
-     * @param string $id
-     * @return \Illuminate\Http\Response
-     */
     public function exportarPdf(string $id)
     {
-        // Buscamos la planificación garantizando que sea del usuario logueado
-        $planificacion = Planificacion::with([
-            'ruta',
-            'etapas.localizacionInicio',
-            'etapas.localizacionFin',
-            'usuario'
-        ])
+        $planificacion = Planificacion::with(['ruta', 'etapas.localizacionInicio', 'etapas.localizacionFin', 'usuario'])
             ->where('usuario_id', Auth::id())
             ->findOrFail($id);
 
-        // Calculamos los datos generales
         $totalKm = $planificacion->etapas->sum('distancia');
-
         $fechaMochilera = \Carbon\Carbon::parse($planificacion->fecha_inicio)->format('d/m/Y');
 
         $data = [
@@ -226,24 +204,65 @@ class PlanificacionController extends Controller
             'fecha' => $fechaMochilera
         ];
 
-        // Generamos el PDF y la descarga
         $pdf = Pdf::loadView('pdf.itinerario', $data)->setPaper('a4', 'portrait');
         $nombreArchivo = 'Itinerario_' . str_replace(' ', '_', $planificacion->ruta->nombre) . '.pdf';
         return $pdf->download($nombreArchivo);
     }
 
-    /**
-     * Summary of exportarExcel
-     * @param string $id
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
-     */
     public function exportarExcel(string $id)
     {
-        // Aseguramos que la planificación existe y es del usuario logueado
         $planificacion = Planificacion::where('usuario_id', Auth::id())->findOrFail($id);
-
         $nombreArchivo = 'Itinerario_' . str_replace(' ', '_', $planificacion->ruta->nombre) . '.xlsx';
-
         return Excel::download(new PlanificacionExport($planificacion->id), $nombreArchivo);
+    }
+
+    /**
+     * INICIAR SEGUIMIENTO DE RUTA
+     */
+    public function empezarRuta(string $id)
+    {
+        $usuarioId = Auth::id();
+        Planificacion::where('usuario_id', $usuarioId)->update(['en_curso' => false]);
+
+        $planificacion = Planificacion::where('usuario_id', $usuarioId)->findOrFail($id);
+        $planificacion->update(['en_curso' => true]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '¡Buen Camino! Has iniciado el seguimiento de esta ruta.'
+        ]);
+    }
+
+    /**
+     * 🚀 NUEVO: DETENER SEGUIMIENTO DE RUTA (Para poder pararla cuando quieras)
+     */
+    public function pararRuta(string $id)
+    {
+        $planificacion = Planificacion::where('usuario_id', Auth::id())->findOrFail($id);
+        $planificacion->update(['en_curso' => false]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Seguimiento detenido correctamente.'
+        ]);
+    }
+
+    /**
+     * MARCAR / DESMARCAR ETAPA (Toggle Progreso)
+     */
+    public function toggleEtapa(string $planificacionId, string $etapaId)
+    {
+        $planificacion = Planificacion::where('usuario_id', Auth::id())->findOrFail($planificacionId);
+        $etapa = $planificacion->etapas()->findOrFail($etapaId);
+
+        $etapa->update([
+            'completada' => !$etapa->completada
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'completada' => (bool)$etapa->completada,
+            'message' => $etapa->completada ? '¡Etapa completada!' : 'Etapa marcada como pendiente.'
+        ]);
     }
 }

@@ -26,6 +26,7 @@ class Planificacion extends Model
         'dias_totales',
         'is_public',
         'activo',
+        'en_curso',
         'original_id',
     ];
 
@@ -40,7 +41,8 @@ class Planificacion extends Model
     {
         return [
             'activo' => 'boolean',
-            'is_public'=> 'boolean',
+            'is_public' => 'boolean',
+            'en_curso' => 'boolean',
             'fecha_inicio' => 'date',
             'km_dia' => 'decimal:2',
             'dias_totales' => 'integer',
