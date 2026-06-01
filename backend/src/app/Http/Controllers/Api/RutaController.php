@@ -87,13 +87,15 @@ class RutaController extends Controller
     }
 
     /**
-     * Calcula las etapas de una ruta según los parámetros del usuario incluyendo alojamientos.
+     * Calcula las etapas de una ruta según los parámetros del usuario
      */
     public function planificar(PlanificarRequest $request)
     {
-        // Cargamos las localizaciones con sus respectivos alojamientos para tenerlos listos
+        // Cargamos las localizaciones con sus respectivos alojamientos
         $ruta = Ruta::with('localizaciones.alojamientos')->findOrFail($request->ruta_id);
-        $localizaciones = $ruta->localizaciones->sortBy('distancia_desde_inicio');
+
+        // El .values() es clave para que los índices sean 0, 1, 2... sin saltos
+        $localizaciones = $ruta->localizaciones->sortBy('distancia_desde_inicio')->values();
 
         $inicioId = $request->localizacion_inicio_id;
         $finId = $request->localizacion_fin_id;
@@ -108,38 +110,50 @@ class RutaController extends Controller
         $kmDia = $request->km_dia;
         $etapas = [];
         $dia = 1;
-        $kmAcumuladosDia = 0;
-        $inicioEtapa = $localizaciones[$indiceInicio];
 
-        for ($i = $indiceInicio + 1; $i <= $indiceFin; $i++) {
-            $distanciaTramo = $localizaciones[$i]->distancia_desde_inicio - $localizaciones[$i-1]->distancia_desde_inicio;
+        $i = $indiceInicio;
 
-            if ($kmAcumuladosDia + $distanciaTramo > $kmDia && $kmAcumuladosDia > 0) {
-                $destinoEtapa = $localizaciones[$i-1];
-                $etapas[] = [
-                    'dia' => $dia,
-                    'inicio' => $inicioEtapa->nombre,
-                    'fin' => $destinoEtapa->nombre,
-                    'distancia' => round($kmAcumuladosDia, 1),
-                    'alojamientos' => $destinoEtapa->alojamientos ?? []
-                ];
-                $dia++;
-                $inicioEtapa = $destinoEtapa;
-                $kmAcumuladosDia = $distanciaTramo;
-            } else {
-                $kmAcumuladosDia += $distanciaTramo;
+        // 👣 BUCLE INTELIGENTE: Avanzamos buscando la mejor parada para cada jornada
+        while ($i < $indiceFin) {
+            $inicioEtapa = $localizaciones[$i];
+            $mejorDestinoIndice = $i + 1;
+            $menorDiferencia = null;
+
+            // Buscamos cuál de las siguientes paradas se ajusta mejor a los km deseados
+            for ($j = $i + 1; $j <= $indiceFin; $j++) {
+                // 🚀 CORREGIDO: Usamos 'distancia_desde_inicio' en ambas partes
+                $distanciaTotalEtapa = $localizaciones[$j]->distancia_desde_inicio - $inicioEtapa->distancia_desde_inicio;
+
+                $diferencia = abs($distanciaTotalEtapa - $kmDia);
+                $limiteMaximoPasarse = $kmDia + 6; // Permitimos pasarnos un máximo de 6km si el pueblo lo vale
+
+                if ($menorDiferencia === null || $diferencia < $menorDiferencia) {
+                    if ($distanciaTotalEtapa <= $limiteMaximoPasarse || $j == $i + 1) {
+                        $menorDiferencia = $diferencia;
+                        $mejorDestinoIndice = $j;
+                    }
+                }
+
+                // Si ya nos estamos pasando demasiado del objetivo, dejamos de evaluar este día
+                if ($distanciaTotalEtapa > $kmDia + 10) {
+                    break;
+                }
             }
-        }
 
-        if ($kmAcumuladosDia > 0) {
-            $destinoFinal = $localizaciones[$indiceFin];
+            // Asignamos el destino óptimo calculado para la jornada
+            $destinoEtapa = $localizaciones[$mejorDestinoIndice];
+            $distanciaFinalEtapa = $destinoEtapa->distancia_desde_inicio - $inicioEtapa->distancia_desde_inicio;
+
             $etapas[] = [
                 'dia' => $dia,
                 'inicio' => $inicioEtapa->nombre,
-                'fin' => $destinoFinal->nombre,
-                'distancia' => round($kmAcumuladosDia, 1),
-                'alojamientos' => $destinoFinal->alojamientos ?? []
+                'fin' => $destinoEtapa->nombre,
+                'distancia' => round($distanciaFinalEtapa, 1),
+                'alojamientos' => $destinoEtapa->alojamientos ?? []
             ];
+
+            $dia++;
+            $i = $mejorDestinoIndice; // Mañana salimos desde donde dormimos hoy
         }
 
         return response()->json([

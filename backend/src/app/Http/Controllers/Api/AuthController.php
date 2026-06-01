@@ -20,6 +20,11 @@ class AuthController extends Controller
             'apellidos' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:usuarios',
             'password' => 'required|string|min:8|confirmed',
+        ], [
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'Las contraseñas introducidas no coinciden.',
+            'email.unique' => 'Este correo electrónico ya está registrado en RutaRaíz.',
+            'nick.unique' => 'Este nick ya está siendo utilizado por otro usuario.',
         ]);
 
         $usuario = Usuario::create([
@@ -29,7 +34,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'rol' => 'usuario',
-            'activo' => true, // Por defecto entran activos
+            'activo' => true,
         ]);
 
         $token = $usuario->createToken('auth_token')->plainTextToken;
@@ -97,7 +102,7 @@ class AuthController extends Controller
             'nick' => 'required|string|max:255|unique:usuarios,nick,' . $usuario->id,
             'email' => 'required|string|email|max:255|unique:usuarios,email,' . $usuario->id,
             'password' => 'nullable|string|min:6|confirmed',
-            'avatar' => 'nullable|string', // Validamos como string porque viaja en Base64
+            'avatar' => 'nullable|string',
         ]);
 
         $usuario->nombre = $request->nombre;

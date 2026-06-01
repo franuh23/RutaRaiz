@@ -7,14 +7,20 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem('token') || null);
     const [loading, setLoading] = useState(true);
 
-    // Función auxiliar para formatear el usuario y asegurar su avatar siempre
+    // 🚀 Función corregida para respetar el Base64 puro directo de Neon
     const formatearUsuario = (usuarioObjeto) => {
         if (!usuarioObjeto) return null;
-        const copiaUsuario = { ...usuarioObjeto };
-        // Si el usuario tiene avatar en la BD pero no tiene la URL completa construida
+        
+        // Si lo que nos llega es la respuesta directa de /api/usuario, extraemos los datos limpios
+        const datosReales = usuarioObjeto.data ? usuarioObjeto.data : usuarioObjeto;
+        
+        const copiaUsuario = { ...datosReales };
+
+        // Aseguramos que la propiedad avatar_url contenga el Base64 limpio si no venía ya mapeada
         if (copiaUsuario.avatar && !copiaUsuario.avatar_url) {
-            copiaUsuario.avatar_url = `/storage/${copiaUsuario.avatar}`;
+            copiaUsuario.avatar_url = copiaUsuario.avatar;
         }
+        
         return copiaUsuario;
     };
 

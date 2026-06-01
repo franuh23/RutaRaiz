@@ -1,9 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Badge from '../ui/Badge';
+import EtapaCard from '../planificacion/EtapaCard'; // 🚀 Reutilizamos tu componente de etapas desplegables
 
-/**
- * Componente interno para el Botón de Like SVG Animado
- */
 const HeartLikeButton = ({ count, isActive, onClick }) => {
   return (
     <button
@@ -16,14 +14,9 @@ const HeartLikeButton = ({ count, isActive, onClick }) => {
         transition: 'transform 0.2s ease',
         transform: isActive ? 'scale(1.1)' : 'scale(1)',
       }}
-      onMouseEnter={(e) => {
-        if (!isActive) e.currentTarget.style.transform = 'scale(1.05)';
-      }}
-      onMouseLeave={(e) => {
-        if (!isActive) e.currentTarget.style.transform = 'scale(1)';
-      }}
+      onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.transform = 'scale(1.05)'; }}
+      onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.transform = 'scale(1)'; }}
     >
-      {/* El Corazón SVG con forma real */}
       <svg
         width="60"
         height="50"
@@ -32,27 +25,13 @@ const HeartLikeButton = ({ count, isActive, onClick }) => {
         stroke={isActive ? '#e91e63' : '#aab8c2'}
         strokeWidth="1.5"
         style={{
-          transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)', // Animación de latido
+          transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           filter: isActive ? 'drop-shadow(0 2px 6px rgba(233, 30, 99, 0.3))' : 'none',
         }}
       >
         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
       </svg>
-      
-      {/* El contador de likes superpuesto de forma elegante */}
-      <span 
-        style={{ 
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          fontSize: '14px',
-          fontWeight: '800',
-          color: isActive ? 'white' : '#666',
-          pointerEvents: 'none',
-          transition: 'color 0.2s ease',
-        }}
-      >
+      <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '14px', fontWeight: '800', color: isActive ? 'white' : '#666', pointerEvents: 'none' }}>
         {count}
       </span>
     </button>
@@ -60,6 +39,9 @@ const HeartLikeButton = ({ count, isActive, onClick }) => {
 };
 
 export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuarioLogueadoId }) {
+  // ⚡ Estado local para controlar si se ven las etapas detalladas de esta tarjeta
+  const [showEtapas, setShowEtapas] = useState(false);
+
   const {
     id,
     ruta_nombre = 'Camino de Santiago',
@@ -69,7 +51,8 @@ export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuario
     km_dia = 20,
     dias_totales = 1,
     likes_count = 0,
-    ha_dado_like = false
+    ha_dado_like = false,
+    etapas = [] // Recibimos las etapas que acabamos de añadir en Laravel
   } = p;
 
   const esMia = usuario_id === usuarioLogueadoId;
@@ -85,6 +68,7 @@ export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuario
     <div className="card shadow-sm border-0 p-4 mb-3 bg-white" style={{ borderRadius: 'var(--radius-lg)' }}>
       <div className="row align-items-center g-3">
         {/* Info de la ruta */}
+        {/* Info de la ruta */}
         <div className="col-12 col-md-8">
           <div className="d-flex align-items-center gap-2 mb-2">
             <h3 className="h5 mb-0" style={{ color: 'var(--verde-bosque)', fontWeight: '700' }}>
@@ -97,21 +81,36 @@ export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuario
           <div className="d-flex flex-wrap gap-2 align-items-center">
             <Badge variant="default" size="sm">👣 {Math.round(km_dia)} km/día</Badge>
             <Badge variant="difficulty-medium" size="sm">🗓️ {dias_totales} {dias_totales === 1 ? 'día' : 'días'}</Badge>
-            <span className="text-muted small ps-1">📅 Salida original: {formatearFecha(fecha_inicio)}</span>
+            <span className="text-muted small ps-1">📅 Salida: {formatearFecha(fecha_inicio)}</span>
+            
+            {/* 🚀 EL NUEVO BOTÓN: Estilizado, moderno, con icono y alineado de categoría */}
+            <button 
+              className="btn btn-sm px-3 py-1 ms-md-2 d-flex align-items-center gap-2"
+              style={{ 
+                fontSize: '12px', 
+                fontWeight: '700',
+                borderRadius: 'var(--radius-md)',
+                border: showEtapas ? '2px solid var(--verde-bosque)' : '2px solid #b0bec5',
+                color: showEtapas ? 'white' : '#546e7a',
+                backgroundColor: showEtapas ? 'var(--verde-bosque)' : 'transparent',
+                transition: 'all 0.2s ease'
+              }}
+              onClick={() => setShowEtapas(!showEtapas)}
+            >
+              <i className={`fa-solid ${showEtapas ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+              <span>{showEtapas ? 'Ocultar Etapas' : `Ver ${etapas.length} Etapas`}</span>
+            </button>
           </div>
         </div>
 
         {/* Acciones de comunidad (Likes y Clonar) */}
         <div className="col-12 col-md-4 d-flex justify-content-md-end align-items-center gap-3">
-          
-          {/* 💖 NUEVO: El Corazón SVG Animado e Interactivo */}
           <HeartLikeButton 
             count={likes_count}
             isActive={ha_dado_like}
             onClick={() => onLike(id)}
           />
 
-          {/* Botón de Clonar - Estilo Viajero "La quiero" */}
           <button
             className="btn d-flex align-items-center gap-2 px-3 text-white"
             onClick={() => onClonar(id)}
@@ -126,8 +125,8 @@ export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuario
               transition: 'all 0.2s ease-in-out',
               boxShadow: esMia ? 'none' : '0 2px 6px rgba(45, 90, 39, 0.2)',
               cursor: esMia ? 'not-allowed' : 'pointer',
-              height: '42px', // Altura alineada con el SVG
-              marginTop: '-5px' // Pequeño ajuste para alinear con el SVG
+              height: '42px',
+              marginTop: '-5px'
             }}
             onMouseEnter={(e) => {
               if (!esMia && clonandoId !== id) {
@@ -151,9 +150,26 @@ export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuario
             )}
             <span>{esMia ? 'En tu mochila' : 'La quiero'}</span>
           </button>
-
         </div>
       </div>
+
+      {/* 🧭 LISTADO DE ETAPAS DESPLEGABLE */}
+      {showEtapas && (
+        <div className="mt-4 pt-3 border-top animate__animated animate__fadeIn">
+          <h5 className="h6 fw-bold text-muted text-uppercase mb-3" style={{ fontSize: '11px', letterSpacing: '0.05em' }}>
+            🗺️ Desglose del itinerario de @{usuario_nick}:
+          </h5>
+          <div className="d-flex flex-column gap-1">
+            {etapas.length > 0 ? (
+              etapas.map((etapa) => (
+                <EtapaCard key={etapa.dia} etapa={etapa} />
+              ))
+            ) : (
+              <p className="text-muted small ps-2">No hay detalles cargados para este camino.</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

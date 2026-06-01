@@ -45,7 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/comunidad/planificaciones/{id}/like', [ComunidadController::class, 'toggleLike']);
     Route::post('/comunidad/planificaciones/{id}/clonar', [ComunidadController::class, 'clonar']);
 
-    // Retorno de datos de sesión activa
+    // Retorno de datos de sesión activa (Corregido para Base64)
     Route::get('/usuario', function (Request $request) {
         $usuario = $request->user();
         return response()->json([
@@ -55,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
             'nick' => $usuario->nick,
             'email' => $usuario->email,
             'rol' => $usuario->rol,
-            'avatar_url' => $usuario->avatar ? asset('storage/' . $usuario->avatar) : null,
+            'avatar_url' => $usuario->avatar ? $usuario->avatar : null,
         ]);
     });
 

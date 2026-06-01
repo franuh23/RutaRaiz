@@ -17,7 +17,8 @@ class ComunidadController extends Controller
      */
     public function index()
     {
-        $publicas = Planificacion::with(['ruta', 'usuario'])
+        // Conectamos las relaciones reales para poder sacar los nombres de los pueblos
+        $publicas = Planificacion::with(['ruta', 'usuario', 'etapas.localizacionInicio', 'etapas.localizacionFin'])
             ->withCount('likes')
             ->where('is_public', true)
             ->latest()
@@ -37,7 +38,17 @@ class ComunidadController extends Controller
                 'likes_count' => $p->likes_count,
                 'ha_dado_like' => \App\Models\PlanificacionLike::where('usuario_id', $usuarioId)
                     ->where('planificacion_id', $p->id)
-                    ->exists()
+                    ->exists(),
+                // 🚀 MAPEADO REAL: Sacamos los nombres de la relación de la BD
+                'etapas' => $p->etapas->map(function ($e) {
+                    return [
+                        'dia' => $e->dia,
+                        'inicio' => $e->localizacionInicio?->nombre,
+                        'fin' => $e->localizacionFin?->nombre,
+                        'distancia' => round($e->distancia, 1),
+                        'alojamientos' => $e->localizacionFin?->alojamientos ?? []
+                    ];
+                })
             ];
         });
 
