@@ -88,4 +88,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/planificaciones/{id}/empezar', [PlanificacionController::class, 'empezarRuta']);
     Route::put('/planificaciones/{planificacionId}/etapas/{etapaId}/toggle', [PlanificacionController::class, 'toggleEtapa']);
     Route::post('/planificaciones/{id}/parar', [PlanificacionController::class, 'pararRuta']);
+    Route::post('/planificaciones/{id}/finalizar', [PlanificacionController::class, 'finalizarRuta']);
 });

@@ -6,13 +6,22 @@ export default function LineaProgreso({ etapas = [], onToggle }) {
   return (
     <div className="position-relative ps-2 pt-2">
       {etapas.map((etapa, index) => {
-        // Leemos las variables exactas que salen del PlanificacionController
         const { id, dia, inicio, fin, distancia, completada } = etapa;
 
+        // 🚀 REGLA DE COHERENCIA EN CASCADA
+        // Se puede pulsar si es el primer día O SI el día anterior ya está completado
+        const diaAnteriorHecho = index === 0 ? true : etapas[index - 1].completada;
+        
+        // Regla para poder desmarcar: solo se puede desmarcar si el día siguiente NO está hecho
+        const diaSiguienteHecho = index === etapas.length - 1 ? false : etapas[index + 1].completada;
+
+        // Combinamos ambas: el botón está habilitado si se puede empezar o si se puede desmarcar
+        const canToggle = (!completada && diaAnteriorHecho) || (completada && !diaSiguienteHecho);
+
         return (
-          <div key={id || index} className="d-flex mb-4 position-relative align-items-start gap-3">
+          <div key={id || index} className="d-flex mb-4 position-relative align-items-start gap-3" style={{ opacity: canToggle ? 1 : 0.5 }}>
             
-            {/* 📏 LÍNEA CONECTOR VERTICAL */}
+            {/* LÍNEA CONECTOR VERTICAL */}
             {index !== etapas.length - 1 && (
               <div 
                 className="position-absolute" 
@@ -28,9 +37,10 @@ export default function LineaProgreso({ etapas = [], onToggle }) {
               />
             )}
 
-            {/* 🔘 CÍRCULO / CHECKBOX INTERACTIVO */}
+            {/* 🔘 CÍRCULO / CHECKBOX INTERACTIVO (Con seguro disabled) */}
             <button
-              onClick={() => onToggle && onToggle(id)}
+              onClick={() => canToggle && onToggle(id)}
+              disabled={!canToggle} // 🚀 Forzamos el bloqueo nativo de HTML
               className="d-flex align-items-center justify-content-center text-white border-0 p-0 shadow-sm"
               style={{
                 width: '42px',
@@ -39,12 +49,12 @@ export default function LineaProgreso({ etapas = [], onToggle }) {
                 backgroundColor: completada ? 'var(--verde-medio)' : '#fff',
                 border: completada ? 'none' : '3px solid #cbd5e1',
                 color: completada ? '#fff' : '#64748b',
-                cursor: 'pointer',
+                cursor: canToggle ? 'pointer' : 'not-allowed',
                 transition: 'all 0.2s ease',
                 zIndex: 2,
                 flexShrink: 0
               }}
-              title={completada ? 'Marcar como pendiente' : 'Marcar como completada'}
+              title={!canToggle ? 'Debes seguir el orden cronológico del camino' : completada ? 'Marcar como pendiente' : 'Marcar como completada'}
             >
               {completada ? (
                 <i className="fa-solid fa-check fs-5"></i>
@@ -53,7 +63,7 @@ export default function LineaProgreso({ etapas = [], onToggle }) {
               )}
             </button>
 
-            {/* 📝 DESCRIPCIÓN GEOGRÁFICA DEL TRAMO */}
+            {/* DESCRIPCIÓN GEOGRÁFICA */}
             <div 
               className="p-3 border flex-grow-1 bg-white d-flex justify-content-between align-items-center flex-wrap gap-2"
               style={{ 
@@ -74,7 +84,7 @@ export default function LineaProgreso({ etapas = [], onToggle }) {
                   </span>
                 </div>
                 <small className="text-muted d-block mt-1 fw-medium">
-                  Jornada de marcha recomendada
+                  {!canToggle && !completada ? '🔒 Tramo bloqueado temporalmente' : 'Jornada de marcha recomendada'}
                 </small>
               </div>
 

@@ -111,7 +111,7 @@ class PlanificacionController extends Controller
         $planificacion = Planificacion::with([
             'ruta',
             'etapas' => function($query) {
-                $query->orderBy('dia', 'asc'); // 🚀 REPARADO: Fijamos el orden SQL para que no se muevan de sitio
+                $query->orderBy('dia', 'asc');
             },
             'etapas.localizacionInicio',
             'etapas.localizacionFin.alojamientos'
@@ -129,7 +129,7 @@ class PlanificacionController extends Controller
                 'completada' => (bool) $etapa->completada,
                 'alojamientos' => $etapa->localizacionFin->alojamientos ?? []
             ];
-        })->values()->all(); // Aseguramos colección limpia de índices
+        })->values()->all();
 
         return response()->json([
             'data' => [
@@ -263,6 +263,24 @@ class PlanificacionController extends Controller
             'status' => 'success',
             'completada' => (bool)$etapa->completada,
             'message' => $etapa->completada ? '¡Etapa completada!' : 'Etapa marcada como pendiente.'
+        ]);
+    }
+
+    /**
+     * 🏁 FINALIZAR Y ARCHIVAR RUTA AL 100%
+     */
+    public function finalizarRuta(string $id)
+    {
+        $planificacion = Planificacion::where('usuario_id', Auth::id())->findOrFail($id);
+        
+        $planificacion->update([
+            'en_curso' => false,
+            'activo' => false
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => '¡Enhorabuena, peregrino! Has completado tu itinerario y archivado la ruta en tu historial.'
         ]);
     }
 }

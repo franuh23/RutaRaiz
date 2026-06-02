@@ -103,6 +103,30 @@ export default function SeguimientoPage() {
         }
     };
 
+    // Nueva función para el fin del camino
+    const handleFinalizarRuta = async () => {
+        if (!window.confirm('🎉 ¡Felicidades! ¿Deseas dar por concluido este viaje y guardarlo en tu historial de éxitos?')) return;
+        setParando(true);
+        try {
+            const response = await fetch(`/api/planificaciones/${rutaActiva.id}/finalizar`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+            if (response.ok) {
+                alert('¡Itinerario completado! Tu registro se ha guardado en el historial de RutaRaíz. 🥾🏆');
+                setRutaActiva(null);
+                navigate('/mis-planificaciones');
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setParando(false);
+        }
+    };
+
     if (loading || cargando) {
         return (
             <Container>
@@ -146,16 +170,28 @@ export default function SeguimientoPage() {
                     </h1>
                 </div>
                 
-                {/* 🚀 BOTÓN DE PARAR CONECTADO */}
-                <Button 
-                    variant="outline" 
-                    onClick={handlePararRuta} 
-                    disabled={parando}
-                    className="btn-outline-danger px-4 border-2 fw-bold"
-                    style={{ borderRadius: 'var(--radius-md)' }}
-                >
-                    {parando ? 'Parando...' : '🛑 Detener seguimiento'}
-                </Button>
+                {/* 🚀 BOTÓN DINÁMICO INTELIGENTE */}
+                {porcentajeProgreso === 100 ? (
+                    <Button 
+                        variant="primary" 
+                        onClick={handleFinalizarRuta} 
+                        disabled={parando}
+                        className="px-4 fw-bold shadow animate__animated animate__bounceIn"
+                        style={{ borderRadius: 'var(--radius-md)', backgroundColor: '#ffc107', color: '#000', border: 'none' }}
+                    >
+                        🏆 FINALIZAR CAMINO
+                    </Button>
+                ) : (
+                    <Button 
+                        variant="outline" 
+                        onClick={handlePararRuta} 
+                        disabled={parando}
+                        className="btn-outline-danger px-4 border-2 fw-bold"
+                        style={{ borderRadius: 'var(--radius-md)' }}
+                    >
+                        {parando ? 'Parando...' : '🛑 Detener seguimiento'}
+                    </Button>
+                )}
             </div>
 
             {/* 📊 SECCIÓN DE MÉTRICAS GENERALES */}

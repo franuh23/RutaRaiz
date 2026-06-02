@@ -145,23 +145,25 @@ export default function PlanificacionCard({ p, onVer, onEliminar, onEmpezar, act
         </div>
 
         <div className="col-12 col-md-6 d-flex justify-content-md-end align-items-center flex-wrap gap-2">
-          
-          {/* 🚀 EL BOTÓN INTERACTIVO DE SEGUIMIENTO */}
-          {en_curso ? (
-            <Button variant="secondary" size="sm" className="px-3 fw-bold" style={{ fontSize: '11px', background: '#e8f5e9', color: '#2e7d32', border: 'none', cursor: 'default' }}>
-              🧭 EN CURSO
-            </Button>
-          ) : (
-            <Button 
-              variant="primary" 
-              size="sm" 
-              className="px-3 fw-bold" 
-              style={{ fontSize: '11px', background: 'var(--verde-bosque)' }}
-              disabled={activandoId === id}
-              onClick={() => onEmpezar && onEmpezar(id)}
-            >
-              {activandoId === id ? <span className="spinner-border spinner-border-sm"></span> : '🏁 EMPEZAR'}
-            </Button>
+
+          {/* 🚀 EL BOTÓN INTERACTIVO DE SEGUIMIENTO (Solo si se pasa la función onEmpezar) */}
+          {onEmpezar && (
+            en_curso ? (
+              <Button variant="secondary" size="sm" className="px-3 fw-bold" style={{ fontSize: '11px', background: '#e8f5e9', color: '#2e7d32', border: 'none', cursor: 'default' }}>
+                🧭 EN CURSO
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                size="sm"
+                className="px-3 fw-bold"
+                style={{ fontSize: '11px', background: 'var(--verde-bosque)' }}
+                disabled={activandoId === id}
+                onClick={() => onEmpezar && onEmpezar(id)}
+              >
+                {activandoId === id ? <span className="spinner-border spinner-border-sm"></span> : '🏁 EMPEZAR'}
+              </Button>
+            )
           )}
 
           {/* Botón Compartir */}
@@ -190,7 +192,7 @@ export default function PlanificacionCard({ p, onVer, onEliminar, onEmpezar, act
           <Button variant="outline" size="sm" onClick={() => onVer && onVer(id)} className="px-3 fw-bold" style={{ fontSize: '11px' }}>
             VER ETAPAS
           </Button>
-          
+
           <button className="btn btn-sm btn-outline-danger px-3 fw-bold" onClick={() => onEliminar && onEliminar(id)} style={{ borderRadius: 'var(--radius-md)', borderWidth: '2px', fontSize: '11px' }}>
             ELIMINAR
           </button>

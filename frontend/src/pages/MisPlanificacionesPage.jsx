@@ -11,8 +11,12 @@ export default function MisPlanificacionesPage() {
   const [cargando, setCargando] = useState(true);
   const [activandoId, setActivandoId] = useState(null);
 
-  // Buscamos si existe alguna planificación activa en curso
+  // 🧭 Buscamos si existe alguna planificación activa en curso (para el banner superior)
   const rutaEnCursoActual = planificaciones.find(p => p.en_curso);
+
+  // 🚀 SEPARACIÓN DE RUTAS POR ESTADO REAL DE NEON
+  const rutasPlanificadas = planificaciones.filter(p => p.activo);
+  const rutasCompletadas = planificaciones.filter(p => !p.activo);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -44,7 +48,6 @@ export default function MisPlanificacionesPage() {
       });
   }, [token, loading]);
 
-  // Disparador hacia Neon para activar el seguimiento de la ruta
   const handleEmpezarRuta = async (id) => {
     setActivandoId(id);
     try {
@@ -59,12 +62,11 @@ export default function MisPlanificacionesPage() {
       const resData = await response.json();
 
       if (response.ok) {
-        // Recorremos el estado y actualizamos en caliente apagando las demás y encendiendo la elegida
         setPlanificaciones(prev => prev.map(p => {
           if (p.id === id) return { ...p, en_curso: true };
           return { ...p, en_curso: false };
         }));
-        navigate('/seguimiento'); // Saltamos directo a la nueva pantalla operativa
+        navigate('/seguimiento');
       } else {
         alert(resData.message || 'No se pudo iniciar el seguimiento.');
       }
@@ -110,24 +112,7 @@ export default function MisPlanificacionesPage() {
 
   return (
     <Container>
-      {/* 🧭 BANNER DE ACCESO DIRECTO: Si hay una ruta en curso, asoma arriba del todo */}
-      {rutaEnCursoActual && (
-        <div className="alert alert-info border-0 p-3 my-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style={{ backgroundColor: '#e3f2fd', borderRadius: 'var(--radius-md)' }}>
-          <div className="d-flex align-items-center gap-2">
-            <i className="fa-solid fa-compass text-primary fs-5 animate__animated animate__pulse animate__infinite"></i>
-            <span className="text-dark fw-medium small">
-              Tienes el <strong>{rutaEnCursoActual.ruta_nombre}</strong> en curso actualmente.
-            </span>
-          </div>
-          <button 
-            className="btn btn-sm btn-primary px-3 py-1 fw-bold" 
-            style={{ borderRadius: 'var(--radius-sm)', fontSize: '11px' }}
-            onClick={() => navigate('/seguimiento')}
-          >
-            VER SEGUIMIENTO ACTIVE ➔
-          </button>
-        </div>
-      )}
+      
 
       <div className="d-flex justify-content-between align-items-center my-4 flex-wrap gap-3">
         <h1 className="h2 m-0" style={{ color: 'var(--verde-bosque)', fontWeight: '700' }}>
@@ -142,16 +127,17 @@ export default function MisPlanificacionesPage() {
         </button>
       </div>
 
+      {/* 📊 TARJETAS ESTADÍSTICAS REPARADAS: Solo suman las rutas vivas/planificadas */}
       {planificaciones && planificaciones.length > 0 && (
-        <div className="row g-3 mb-4">
+        <div className="row g-3 mb-5">
           <div className="col-12 col-sm-4">
             <div className="card border-0 shadow-sm p-3 bg-white d-flex flex-row align-items-center gap-3" style={{ borderRadius: 'var(--radius-md)' }}>
               <div className="d-flex align-items-center justify-content-center bg-light text-success" style={{ width: '45px', height: '45px', borderRadius: '50%', fontSize: '20px' }}>
                 <i className="fa-solid fa-map-location-dot"></i>
               </div>
               <div>
-                <h4 className="text-muted small mb-0 fw-bold">MIS ITINERARIOS</h4>
-                <span className="h4 mb-0 fw-bold text-dark">{planificaciones.length}</span>
+                <h4 className="text-muted small mb-0 fw-bold">PLANIFICADAS</h4>
+                <span className="h4 mb-0 fw-bold text-dark">{rutasPlanificadas.length}</span>
               </div>
             </div>
           </div>
@@ -162,9 +148,9 @@ export default function MisPlanificacionesPage() {
                 <i className="fa-solid fa-route"></i>
               </div>
               <div>
-                <h4 className="text-muted small mb-0 fw-bold">KM TOTALES</h4>
+                <h4 className="text-muted small mb-0 fw-bold">KM FUTUROS</h4>
                 <span className="h4 mb-0 fw-bold text-dark">
-                  {Math.round(planificaciones.reduce((acc, p) => acc + (p.km_dia * p.dias_totales), 0))} km
+                  {Math.round(rutasPlanificadas.reduce((acc, p) => acc + (p.km_dia * p.dias_totales), 0))} km
                 </span>
               </div>
             </div>
@@ -172,13 +158,13 @@ export default function MisPlanificacionesPage() {
 
           <div className="col-12 col-sm-4">
             <div className="card border-0 shadow-sm p-3 bg-white d-flex flex-row align-items-center gap-3" style={{ borderRadius: 'var(--radius-md)' }}>
-              <div className="d-flex align-items-center justify-content-center" style={{ width: '45px', height: '45px', borderRadius: '50%', fontSize: '20px', backgroundColor: 'rgba(74, 114, 85, 0.1)', color: 'var(--verde-bosque)' }}>
-                <i className="fa-solid fa-eye"></i>
+              <div className="d-flex align-items-center justify-content-center bg-warning text-dark" style={{ width: '45px', height: '45px', borderRadius: '50%', fontSize: '20px', backgroundColor: '#fff8e1' }}>
+                <i className="fa-solid fa-trophy"></i>
               </div>
               <div>
-                <h4 className="text-muted small mb-0 fw-bold">COMPARTIDAS</h4>
+                <h4 className="text-muted small mb-0 fw-bold">COMPLETADAS</h4>
                 <span className="h4 mb-0 fw-bold text-dark">
-                  {planificaciones.filter(p => p.is_public).length}
+                  {rutasCompletadas.length}
                 </span>
               </div>
             </div>
@@ -186,16 +172,37 @@ export default function MisPlanificacionesPage() {
         </div>
       )}
 
-      {planificaciones.length === 0 ? (
-        <div className="text-center py-5 border rounded bg-white shadow-sm my-4" style={{ borderRadius: 'var(--radius-lg)' }}>
-          <p className="text-muted mb-4">Todavía no tienes ninguna planificación guardada.</p>
-          <button className="btn text-white px-4 py-2" onClick={() => navigate('/planificador')} style={{ background: 'var(--verde-bosque)', fontWeight: '600', borderRadius: 'var(--radius-md)', border: 'none' }}>
-            Crear mi primera ruta
+      {/* 🧭 BANNER DE ACCESO DIRECTO */}
+      {rutaEnCursoActual && (
+        <div className="alert alert-info border-0 p-3 my-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style={{ backgroundColor: '#e3f2fd', borderRadius: 'var(--radius-md)' }}>
+          <div className="d-flex align-items-center gap-2">
+            <i className="fa-solid fa-compass text-primary fs-5 animate__animated animate__pulse animate__infinite"></i>
+            <span className="text-dark fw-medium small">
+              Tienes el <strong>{rutaEnCursoActual.ruta_nombre}</strong> en curso actualmente.
+            </span>
+          </div>
+          <button 
+            className="btn btn-sm btn-primary px-3 py-1 fw-bold" 
+            style={{ borderRadius: 'var(--radius-sm)', fontSize: '11px' }}
+            onClick={() => navigate('/seguimiento')}
+          >
+            VER SEGUIMIENTO ACTIVO ➔
           </button>
+        </div>
+      )}
+
+      {/* 📂 SECCIÓN 1: ITINERARIOS PLANIFICADOS */}
+      <h3 className="h5 fw-bold mb-3 text-muted text-uppercase" style={{ fontSize: '13px', letterSpacing: '0.05em' }}>
+        🎒 Próximos Desafíos ({rutasPlanificadas.length})
+      </h3>
+      
+      {rutasPlanificadas.length === 0 ? (
+        <div className="text-center py-4 border rounded bg-white shadow-sm mb-5" style={{ borderRadius: 'var(--radius-lg)' }}>
+          <p className="text-muted small mb-0">No tienes itinerarios pendientes en tu mochila.</p>
         </div>
       ) : (
         <div className="mb-5 d-flex flex-column gap-3">
-          {planificaciones.map(p => (
+          {rutasPlanificadas.map(p => (
             <PlanificacionCard
               key={p.id}
               p={p}
@@ -205,6 +212,27 @@ export default function MisPlanificacionesPage() {
               activandoId={activandoId}
             />
           ))}
+        </div>
+      )}
+
+      {/* 🏆 SECCIÓN 2: HISTORIAL DE ÉXITOS PEREGRINOS (Solo asoma si hay alguna completa) */}
+      {rutasCompletadas.length > 0 && (
+        <div className="mt-5 mb-5">
+          <h3 className="h5 fw-bold mb-3 text-warning text-uppercase" style={{ fontSize: '13px', letterSpacing: '0.05em' }}>
+            🏆 Historial de Caminos Completados ({rutasCompletadas.length})
+          </h3>
+          <div className="d-flex flex-column gap-3">
+            {rutasCompletadas.map(p => (
+              <div key={p.id} className="opacity-75">
+                <PlanificacionCard
+                  p={{ ...p, ruta_nombre: `🎉 ${p.ruta_nombre} (¡Completado!)` }}
+                  onVer={(id) => navigate(`/mis-planificaciones/${id}`)}
+                  onEliminar={handleEliminar}
+                  onEmpezar={null} // Al pasar null, no saldrá el botón de empezar ruta otra vez
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </Container>
