@@ -30,71 +30,123 @@ class PlanificacionController extends Controller
      */
     public function store(Request $request)
     {
+        // 1. 🚀 VALIDACIÓN AVANZADA CONDICIONAL (Modo 3.1 Pro)
         $request->validate([
             'ruta_id' => 'required|exists:rutas,id',
             'localizacion_inicio_id' => 'required|exists:localizaciones,id',
-            'localizacion_fin_id' => 'nullable|exists:localizaciones,id',
             'fecha_inicio' => 'required|date',
-            'km_dia' => 'required|numeric|min:1|max:100',
+            'tipo_planificacion' => 'required|in:destino_ritmo,dias_ritmo,destino_dias',
+            'dias_disponibles' => 'required_if:tipo_planificacion,dias_ritmo,destino_dias|nullable|integer|min:1|max:90',
+            'km_dia' => 'required_if:tipo_planificacion,destino_ritmo,dias_ritmo|nullable|numeric|min:1|max:100',
+            'localizacion_fin_id' => 'required_if:tipo_planificacion,destino_dias|nullable|exists:localizaciones,id',
         ]);
 
+        // Cargar la ruta y ordenar sus hitos geográficos por distancia real
         $ruta = Ruta::with('localizaciones')->findOrFail($request->ruta_id);
-        $localizaciones = $ruta->localizaciones->sortBy('distancia_desde_inicio');
+        $localizaciones = $ruta->localizaciones->sortBy('distancia_desde_inicio')->values();
 
         $inicioId = $request->localizacion_inicio_id;
         $finId = $request->localizacion_fin_id;
+        $tipo = $request->tipo_planificacion;
 
+        // Buscar el índice físico de salida
         $indiceInicio = $localizaciones->search(fn($loc) => $loc->id == $inicioId);
-        $indiceFin = $finId ? $localizaciones->search(fn($loc) => $loc->id == $finId) : $localizaciones->count() - 1;
-
-        if ($indiceInicio === false || $indiceFin === false || $indiceInicio >= $indiceFin) {
+        if ($indiceInicio === false) {
             return response()->json(['error' => 'Localizaciones no válidas'], 422);
         }
 
-        $kmDia = $request->km_dia;
-        $etapasCalculadas = [];
-        $dia = 1;
-        $kmAcumulados = 0;
-        $inicioEtapa = $localizaciones[$indiceInicio];
-
-        for ($i = $indiceInicio + 1; $i <= $indiceFin; $i++) {
-            $distanciaTramo = $localizaciones[$i]->distancia_desde_inicio - $localizaciones[$i - 1]->distancia_desde_inicio;
-
-            if ($kmAcumulados + $distanciaTramo > $kmDia && $kmAcumulados > 0) {
-                $etapasCalculadas[] = [
-                    'dia' => $dia,
-                    'localizacion_inicio_id' => $inicioEtapa->id,
-                    'localizacion_fin_id' => $localizaciones[$i - 1]->id,
-                    'distancia' => round($kmAcumulados, 2),
-                ];
-                $dia++;
-                $inicioEtapa = $localizaciones[$i - 1];
-                $kmAcumulados = $distanciaTramo;
-            } else {
-                $kmAcumulados += $distanciaTramo;
+        // 🛠️ REPARADO: Control de fin si viene vacío ("Hasta el final del camino") o según el modo
+        if ($tipo === 'dias_ritmo' || (empty($finId) && $tipo === 'destino_ritmo')) {
+            $indiceFin = $localizaciones->count() - 1; // Último hito de la ruta por defecto
+        } else {
+            $indiceFin = $localizaciones->search(fn($loc) => $loc->id == $finId);
+            if ($indiceFin === false || $indiceInicio >= $indiceFin) {
+                return response()->json(['error' => 'La localización de fin debe ser posterior a la de inicio.'], 422);
             }
         }
 
-        if ($kmAcumulados > 0) {
+        // 2. 🧮 PRE-CÁLCULO INICIAL DE VARIABLES
+        $kmDia = $request->km_dia;
+        $diasMaximos = $request->dias_disponibles;
+
+        if ($tipo === 'destino_dias') {
+            $distanciaTotalTramo = $localizaciones[$indiceFin]->distancia_desde_inicio - $localizaciones[$indiceInicio]->distancia_desde_inicio;
+            $kmDia = $diasMaximos > 0 ? round($distanciaTotalTramo / $diasMaximos, 2) : 20;
+        }
+
+        // 3. 🌀 BUCLE REPARADO: GENERADOR DE ETAPAS CON REPARTO EQUITATIVO DINÁMICO
+        $etapasCalculadas = [];
+        $dia = 1;
+        $i = $indiceInicio;
+        $indiceDetencionReal = $indiceFin;
+
+        while ($i < $indiceFin) {
+
+            // 🛑 FRENO DE MANO DE JORNADAS (Modo días_ritmo)
+            if (($tipo === 'dias_ritmo' || $tipo === 'destino_dias') && $dia > $diasMaximos) {
+                $indiceDetencionReal = $i;
+                break;
+            }
+
+            $inicioEtapa = $localizaciones[$i];
+            $mejorDestinoIndice = $i + 1;
+            $menorDiferencia = null;
+
+            // 🚀 RECALCULO DE OBJETIVO DÍA A DÍA (Evita la etapa final destructiva de 67 km)
+            if ($tipo === 'destino_dias') {
+                $distanciaRestante = $localizaciones[$indiceFin]->distancia_desde_inicio - $inicioEtapa->distancia_desde_inicio;
+                $diasRestantes = ($diasMaximos - $dia) + 1;
+                $kmDia = $diasRestantes > 0 ? ($distanciaRestante / $diasRestantes) : $distanciaRestante;
+            }
+
+            // Buscar cuál de las siguientes paradas se ajusta mejor al objetivo actual recalculado
+            for ($j = $i + 1; $j <= $indiceFin; $j++) {
+                $distanciaTotalEtapa = $localizaciones[$j]->distancia_desde_inicio - $inicioEtapa->distancia_desde_inicio;
+                $diferencia = abs($distanciaTotalEtapa - $kmDia);
+
+                // Si es el último día de un Reto Crono, dejamos un margen amplio para cerrar en el destino real
+                $limiteMaximoPasarse = ($tipo === 'destino_dias' && $dia == $diasMaximos) ? $kmDia + 30 : $kmDia + 6;
+
+                if ($menorDiferencia === null || $diferencia < $menorDiferencia) {
+                    if ($distanciaTotalEtapa <= $limiteMaximoPasarse || $j == $i + 1) {
+                        $menorDiferencia = $diferencia;
+                        $mejorDestinoIndice = $j;
+                    }
+                }
+
+                if ($distanciaTotalEtapa > $kmDia + 15) {
+                    break;
+                }
+            }
+
+            $distanciaFinalEtapa = $localizaciones[$mejorDestinoIndice]->distancia_desde_inicio - $localizaciones[$i]->distancia_desde_inicio;
+
             $etapasCalculadas[] = [
                 'dia' => $dia,
-                'localizacion_inicio_id' => $inicioEtapa->id,
-                'localizacion_fin_id' => $localizaciones[$indiceFin]->id,
-                'distancia' => round($kmAcumulados, 2),
+                'localizacion_inicio_id' => $localizaciones[$i]->id,
+                'localizacion_fin_id' => $localizaciones[$mejorDestinoIndice]->id,
+                'distancia' => round($distanciaFinalEtapa, 2),
             ];
+
+            $dia++;
+            $i = $mejorDestinoIndice;
         }
+
+        // 4. 💾 PERSISTENCIA CON RE-AJUSTE AUTOMÁTICO DE METAS
+        $finalRealId = ($tipo === 'dias_ritmo') ? $localizaciones[$indiceDetencionReal]->id : $localizaciones[$indiceFin]->id;
 
         $planificacion = Planificacion::create([
             'usuario_id' => Auth::id(),
             'ruta_id' => $request->ruta_id,
             'localizacion_inicio_id' => $request->localizacion_inicio_id,
-            'localizacion_fin_id' => $request->localizacion_fin_id,
+            'localizacion_fin_id' => $finalRealId,
             'fecha_inicio' => $request->fecha_inicio,
-            'km_dia' => $request->km_dia,
+            'km_dia' => round($kmDia, 2), // Guardamos el ritmo final equilibrado
             'dias_totales' => count($etapasCalculadas),
             'activo' => true,
         ]);
 
+        // Guardar físicamente las etapas calculadas en la tabla 'etapas'
         foreach ($etapasCalculadas as $etapa) {
             $planificacion->etapas()->create($etapa);
         }
@@ -110,14 +162,14 @@ class PlanificacionController extends Controller
     {
         $planificacion = Planificacion::with([
             'ruta',
-            'etapas' => function($query) {
+            'etapas' => function ($query) {
                 $query->orderBy('dia', 'asc');
             },
             'etapas.localizacionInicio',
             'etapas.localizacionFin.alojamientos'
         ])
-        ->where('usuario_id', Auth::id())
-        ->findOrFail($id);
+            ->where('usuario_id', Auth::id())
+            ->findOrFail($id);
 
         $etapasFormateadas = $planificacion->etapas->map(function ($etapa) {
             return [
@@ -234,7 +286,7 @@ class PlanificacionController extends Controller
     }
 
     /**
-     * 🚀 NUEVO: DETENER SEGUIMIENTO DE RUTA (Para poder pararla cuando quieras)
+     * 🚀 DETENER SEGUIMIENTO DE RUTA
      */
     public function pararRuta(string $id)
     {
@@ -261,7 +313,7 @@ class PlanificacionController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'completada' => (bool)$etapa->completada,
+            'completada' => (bool) $etapa->completada,
             'message' => $etapa->completada ? '¡Etapa completada!' : 'Etapa marcada como pendiente.'
         ]);
     }
@@ -272,7 +324,7 @@ class PlanificacionController extends Controller
     public function finalizarRuta(string $id)
     {
         $planificacion = Planificacion::where('usuario_id', Auth::id())->findOrFail($id);
-        
+
         $planificacion->update([
             'en_curso' => false,
             'activo' => false

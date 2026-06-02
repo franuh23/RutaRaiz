@@ -34,7 +34,7 @@ export default function HeroSection({ onPlanificar }) {
             >
               🎒 Comenzar mi ruta
             </button>
-            
+
             <Button
               variant="outline"
               size="md"
@@ -52,8 +52,8 @@ export default function HeroSection({ onPlanificar }) {
               { valor: 'A medida', label: 'Etapas Diarias' },
             ].map((s) => (
               <div key={s.label} className={styles.stat}>
-                <span className={styles.statValor}>{s.valor}</span>
                 <span className={styles.statLabel}>{s.label}</span>
+                <span className={styles.statValor}>{s.valor}</span>
               </div>
             ))}
           </div>

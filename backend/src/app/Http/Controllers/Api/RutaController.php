@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Ruta;
 use App\Http\Resources\RutaResource;
 use App\Http\Requests\PlanificarRequest;
-use App\Http\Requests\RutaPost; // 🎒 Importamos tu Request real de creación
-use App\Http\Requests\RutaPut;  // 📝 Importamos tu Request real de edición
+use App\Http\Requests\RutaPost;
+use App\Http\Requests\RutaPut;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -87,45 +87,76 @@ class RutaController extends Controller
     }
 
     /**
-     * Calcula las etapas de una ruta según los parámetros del usuario
+     * Calcula las etapas de una ruta según los parámetros del usuario (Simulador al vuelo)
      */
     public function planificar(PlanificarRequest $request)
     {
         // Cargamos las localizaciones con sus respectivos alojamientos
         $ruta = Ruta::with('localizaciones.alojamientos')->findOrFail($request->ruta_id);
-
-        // El .values() es clave para que los índices sean 0, 1, 2... sin saltos
         $localizaciones = $ruta->localizaciones->sortBy('distancia_desde_inicio')->values();
 
         $inicioId = $request->localizacion_inicio_id;
         $finId = $request->localizacion_fin_id;
+        $tipo = $request->tipo_planificacion;
 
+        // Buscar el índice físico de salida
         $indiceInicio = $localizaciones->search(fn($loc) => $loc->id == $inicioId);
-        $indiceFin = $finId ? $localizaciones->search(fn($loc) => $loc->id == $finId) : $localizaciones->count() - 1;
-
-        if ($indiceInicio === false || $indiceFin === false || $indiceInicio >= $indiceFin) {
-            return response()->json(['error' => 'Localizaciones no válidas'], 422);
+        if ($indiceInicio === false) {
+            return response()->json(['error' => 'Localización de inicio no válida'], 422);
         }
 
+        // 🚀 REPARADO: Control estricto de fin según el modo y si viene vacío
+        if ($tipo === 'dias_ritmo' || (empty($finId) && $tipo === 'destino_ritmo')) {
+            $indiceFin = $localizaciones->count() - 1; // Último hito de la ruta por defecto
+        } else {
+            $indiceFin = $localizaciones->search(fn($loc) => $loc->id == $finId);
+            if ($indiceFin === false || $indiceInicio >= $indiceFin) {
+                return response()->json(['error' => 'La localización de fin debe ser posterior a la de inicio.'], 422);
+            }
+        }
+
+        // 🧮 PRE-CÁLCULO MATEMÁTICO DE RITMO (Variante 2: Reto Crono)
         $kmDia = $request->km_dia;
+        $diasMaximos = $request->dias_disponibles;
+
+        if ($tipo === 'destino_dias') {
+            $distanciaTotalTramo = $localizaciones[$indiceFin]->distancia_desde_inicio - $localizaciones[$indiceInicio]->distancia_desde_inicio;
+            $kmDia = $diasMaximos > 0 ? round($distanciaTotalTramo / $diasMaximos, 2) : 20;
+        }
+
         $etapas = [];
         $dia = 1;
-
         $i = $indiceInicio;
+        $indiceDetencionReal = $indiceFin;
 
-        // 👣 BUCLE INTELIGENTE: Avanzamos buscando la mejor parada para cada jornada
+        // 👣 BUCLE INTELIGENTE CON REPARTO EQUITATIVO DINÁMICO
         while ($i < $indiceFin) {
+
+            // 🛑 FRENO DE MANO DE JORNADAS
+            if (($tipo === 'dias_ritmo' || $tipo === 'destino_dias') && $dia > $diasMaximos) {
+                $indiceDetencionReal = $i;
+                break;
+            }
+
             $inicioEtapa = $localizaciones[$i];
             $mejorDestinoIndice = $i + 1;
             $menorDiferencia = null;
 
-            // Buscamos cuál de las siguientes paradas se ajusta mejor a los km deseados
+            // 🚀 RECALCULO DE OBJETIVO DÍA A DÍA (Para evitar el efecto bola de nieve en Reto Crono)
+            if ($tipo === 'destino_dias') {
+                $distanciaRestante = $localizaciones[$indiceFin]->distancia_desde_inicio - $inicioEtapa->distancia_desde_inicio;
+                $diasRestantes = ($diasMaximos - $dia) + 1;
+                $kmDia = $diasRestantes > 0 ? ($distanciaRestante / $diasRestantes) : $distanciaRestante;
+            }
+
+            // Buscamos cuál de las siguientes paradas se ajusta mejor al objetivo actual
             for ($j = $i + 1; $j <= $indiceFin; $j++) {
-                // 🚀 CORREGIDO: Usamos 'distancia_desde_inicio' en ambas partes
                 $distanciaTotalEtapa = $localizaciones[$j]->distancia_desde_inicio - $inicioEtapa->distancia_desde_inicio;
 
                 $diferencia = abs($distanciaTotalEtapa - $kmDia);
-                $limiteMaximoPasarse = $kmDia + 6; // Permitimos pasarnos un máximo de 6km si el pueblo lo vale
+
+                // Margen flexible: si es el último día, permitimos llegar al final
+                $limiteMaximoPasarse = ($tipo === 'destino_dias' && $dia == $diasMaximos) ? $kmDia + 30 : $kmDia + 6;
 
                 if ($menorDiferencia === null || $diferencia < $menorDiferencia) {
                     if ($distanciaTotalEtapa <= $limiteMaximoPasarse || $j == $i + 1) {
@@ -134,13 +165,11 @@ class RutaController extends Controller
                     }
                 }
 
-                // Si ya nos estamos pasando demasiado del objetivo, dejamos de evaluar este día
-                if ($distanciaTotalEtapa > $kmDia + 10) {
+                if ($distanciaTotalEtapa > $kmDia + 15) {
                     break;
                 }
             }
 
-            // Asignamos el destino óptimo calculado para la jornada
             $destinoEtapa = $localizaciones[$mejorDestinoIndice];
             $distanciaFinalEtapa = $destinoEtapa->distancia_desde_inicio - $inicioEtapa->distancia_desde_inicio;
 
@@ -153,13 +182,16 @@ class RutaController extends Controller
             ];
 
             $dia++;
-            $i = $mejorDestinoIndice; // Mañana salimos desde donde dormimos hoy
+            $i = $mejorDestinoIndice;
         }
+
+        // Si salimos por freno de mano, recalculamos el índice geográfico real donde murió la estimación
+        $finalRealIndice = ($tipo === 'dias_ritmo' || $tipo === 'destino_dias') ? $indiceDetencionReal : $indiceFin;
 
         return response()->json([
             'etapas' => $etapas,
-            'km_dia' => $kmDia,
-            'total_km' => round($localizaciones[$indiceFin]->distancia_desde_inicio - $localizaciones[$indiceInicio]->distancia_desde_inicio, 1),
+            'km_dia' => round($kmDia, 1), // Mandamos el ritmo real (o el calculado) para las tarjetas de React
+            'total_km' => round($localizaciones[$finalRealIndice]->distancia_desde_inicio - $localizaciones[$indiceInicio]->distancia_desde_inicio, 1),
             'dias_totales' => count($etapas)
         ]);
     }

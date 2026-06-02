@@ -15,15 +15,50 @@ export default function FormularioPlanificador({
   fechaInicio,
   setFechaInicio,
   onSubmit,
-  loading
+  loading,
+  // 🚀 NUEVAS PROPS MODO 3.1 PRO
+  tipoPlanificacion,
+  setTipoPlanificacion,
+  diasDisponibles,
+  setDiasDisponibles
 }) {
-  // 🔥 Capturamos el día de hoy en formato YYYY-MM-DD para bloquear el pasado
   const hoy = new Date().toISOString().split('T')[0];
 
   return (
     <div className="card shadow-sm border-0 p-4 mb-4 bg-white" style={{ borderRadius: 'var(--radius-lg)' }}>
+      
+      {/* 🎛️ SELECTOR VISUAL DE MODO (Tabs corporativos) */}
+      <div className="d-flex btn-group mb-4 bg-light p-1" style={{ borderRadius: 'var(--radius-md)' }}>
+        <button
+          type="button"
+          className={`btn btn-sm fw-bold ${tipoPlanificacion === 'destino_ritmo' ? 'bg-white shadow text-dark' : 'text-muted border-0'}`}
+          onClick={() => setTipoPlanificacion('destino_ritmo')}
+          style={{ borderRadius: 'var(--radius-sm)', transition: 'all 0.2s' }}
+        >
+          🎯 Clásico (Fijar Destino + Ritmo)
+        </button>
+        <button
+          type="button"
+          className={`btn btn-sm fw-bold ${tipoPlanificacion === 'dias_ritmo' ? 'bg-white shadow text-dark' : 'text-muted border-0'}`}
+          onClick={() => setTipoPlanificacion('dias_ritmo')}
+          style={{ borderRadius: 'var(--radius-sm)', transition: 'all 0.2s' }}
+        >
+          ⏳ Días limitados (Fijar Días + Ritmo)
+        </button>
+        <button
+          type="button"
+          className={`btn btn-sm fw-bold ${tipoPlanificacion === 'destino_dias' ? 'bg-white shadow text-dark' : 'text-muted border-0'}`}
+          onClick={() => setTipoPlanificacion('destino_dias')}
+          style={{ borderRadius: 'var(--radius-sm)', transition: 'all 0.2s' }}
+        >
+          🚀 Reto Crono (Fijar Destino + Días)
+        </button>
+      </div>
+
       <form onSubmit={onSubmit}>
         <div className="row g-3">
+          
+          {/* Campo: Selecciona tu ruta (Siempre visible) */}
           <div className="col-12 col-md-6">
             <label className="form-label fw-bold text-dark small">Selecciona tu ruta:</label>
             <select className="form-select" value={selectedRuta} onChange={(e) => setSelectedRuta(e.target.value)} required>
@@ -34,6 +69,7 @@ export default function FormularioPlanificador({
             </select>
           </div>
 
+          {/* Campo: Punto de inicio (Siempre visible) */}
           <div className="col-12 col-md-6">
             <label className="form-label fw-bold text-dark small">Punto de inicio:</label>
             <select className="form-select" value={inicioId} onChange={(e) => setInicioId(e.target.value)} required disabled={!selectedRuta}>
@@ -46,31 +82,60 @@ export default function FormularioPlanificador({
             </select>
           </div>
 
-          <div className="col-12 col-md-6">
-            <label className="form-label fw-bold text-dark small">Punto de fin (opcional):</label>
-            <select className="form-select" value={finId} onChange={(e) => setFinId(e.target.value)} disabled={!selectedRuta}>
-              <option value="">Hasta el final del camino</option>
-              {localizaciones.map(loc => (
-                <option key={loc.id} value={loc.id}>
-                  {loc.nombre} ({loc.distancia_desde_inicio} km)
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* 🎯 CONDICIONAL: Punto de fin (Se oculta en el modo 'dias_ritmo' porque se autocalcula) */}
+          {tipoPlanificacion !== 'dias_ritmo' && (
+            <div className="col-12 col-md-6 animate__animated animate__fadeIn">
+              <label className="form-label fw-bold text-dark small">Punto de fin:</label>
+              <select 
+                className="form-select" 
+                value={finId} 
+                onChange={(e) => setFinId(e.target.value)} 
+                disabled={!selectedRuta}
+                required={tipoPlanificacion === 'destino_dias'} // Obligatorio si calcula ritmo
+              >
+                <option value="">{tipoPlanificacion === 'destino_ritmo' ? 'Hasta el final del camino (Opcional)' : 'Selecciona hito de destino (Obligatorio)'}</option>
+                {localizaciones.map(loc => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.nombre} ({loc.distancia_desde_inicio} km)
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
-          <div className="col-12 col-md-6">
-            <label className="form-label fw-bold text-dark small">Ritmo de marcha (Km / día):</label>
-            <input
-              type="number"
-              className="form-control"
-              value={kmDia}
-              onChange={(e) => setKmDia(Number(e.target.value) || '')}
-              min="1"
-              max="100"
-              required
-            />
-          </div>
+          {/* ⏳ CONDICIONAL: Días disponibles (Se muestra si el tiempo está limitado) */}
+          {tipoPlanificacion !== 'destino_ritmo' && (
+            <div className="col-12 col-md-6 animate__animated animate__fadeIn">
+              <label className="form-label fw-bold text-dark small">Días disponibles para caminar:</label>
+              <input
+                type="number"
+                className="form-control"
+                value={diasDisponibles}
+                onChange={(e) => setDiasDisponibles(Number(e.target.value) || '')}
+                min="1"
+                max="90"
+                required
+              />
+            </div>
+          )}
 
+          {/* 👣 CONDICIONAL: Ritmo de marcha (Se oculta en 'destino_dias' porque lo calcula Laravel) */}
+          {tipoPlanificacion !== 'destino_dias' && (
+            <div className="col-12 col-md-6 animate__animated animate__fadeIn">
+              <label className="form-label fw-bold text-dark small">Ritmo de marcha (Km / día):</label>
+              <input
+                type="number"
+                className="form-control"
+                value={kmDia}
+                onChange={(e) => setKmDia(Number(e.target.value) || '')}
+                min="1"
+                max="100"
+                required
+              />
+            </div>
+          )}
+
+          {/* Campo: Fecha de inicio (Siempre visible) */}
           <div className="col-12">
             <label className="form-label fw-bold text-dark small">Fecha de inicio de caminata:</label>
             <input
@@ -78,12 +143,12 @@ export default function FormularioPlanificador({
               className="form-control"
               value={fechaInicio}
               onChange={(e) => setFechaInicio(e.target.value)}
-              min={hoy} // 👈 Control nativo: fechas anteriores a hoy se quedan deshabilitadas
+              min={hoy}
+              required
             />
           </div>
         </div>
 
-        {/* Inyección de tu botón principal color tierra con sombras y transiciones */}
         <Button 
           type="submit" 
           variant="primary" 

@@ -5,9 +5,9 @@ import styles from './RouteCard.module.css';
 
 // Corregidos los keys para que coincidan con el enum sin tildes del backend
 const DIFFICULTY_VARIANT = {
-  facil:   'difficulty-easy',
+  baja:   'difficulty-easy',
   media:   'difficulty-medium',
-  dificil: 'difficulty-hard',
+  alta: 'difficulty-hard',
 };
 
 export default function RouteCard({ ruta }) {
