@@ -7,7 +7,7 @@ use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password; // 🚀 REGLA MODO 3.1 PRO DE SEGURIDAD
 
 class AuthController extends Controller
 {
@@ -19,10 +19,20 @@ class AuthController extends Controller
             'nombre' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:usuarios',
-            'password' => 'required|string|min:8|confirmed',
+
+            // 🔒 CONTRASEÑA BLINDADA
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)->letters()->numbers()->symbols()
+            ],
         ], [
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
             'password.confirmed' => 'Las contraseñas introducidas no coinciden.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.letters' => 'La contraseña debe contener al menos una letra.',
+            'password.numbers' => 'La contraseña debe contener al menos un número.',
+            'password.symbols' => 'La contraseña debe contener al menos un símbolo especial.',
             'email.unique' => 'Este correo electrónico ya está registrado en RutaRaíz.',
             'nick.unique' => 'Este nick ya está siendo utilizado por otro usuario.',
         ]);
@@ -54,24 +64,20 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        // 1. Comprobamos si las credenciales de email y contraseña coinciden
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'message' => 'Credenciales inválidas'
             ], 401);
         }
 
-        // Buscamos el registro real del usuario en la base de datos de Neon
         $usuario = Usuario::where('email', $request->email)->firstOrFail();
 
-        // EL CERROJO: Si el admin lo marcó como inactivo/baneado, frenamos el login
         if (!$usuario->activo) {
             return response()->json([
                 'message' => 'Tu cuenta en RutaRaíz ha sido suspendida temporal o permanentemente por los administradores.'
-            ], 403); // Devolvemos un código 403 Forbidden (Acceso prohibido)
+            ], 403);
         }
 
-        // 4. Si está activo, permitimos la generación de token normal
         $token = $usuario->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -101,8 +107,23 @@ class AuthController extends Controller
             'apellidos' => 'required|string|max:255',
             'nick' => 'required|string|max:255|unique:usuarios,nick,' . $usuario->id,
             'email' => 'required|string|email|max:255|unique:usuarios,email,' . $usuario->id,
-            'password' => 'nullable|string|min:6|confirmed',
             'avatar' => 'nullable|string',
+
+            // 🔒 CONTRASEÑA EN PERFIL
+            'password' => [
+                'nullable',
+                'string',
+                'confirmed',
+                Password::min(8)->letters()->numbers()->symbols()
+            ],
+        ], [
+            'password.confirmed' => 'La confirmación de la nueva contraseña no coincide.',
+            'password.min' => 'La nueva contraseña debe tener al menos 8 caracteres.',
+            'password.letters' => 'La nueva contraseña debe contener al menos una letra.',
+            'password.numbers' => 'La nueva contraseña debe contener al menos un número.',
+            'password.symbols' => 'La nueva contraseña debe contener al menos un símbolo especial.',
+            'nick.unique' => 'Este nick ya está registrado.',
+            'email.unique' => 'Este correo electrónico ya está registrado.',
         ]);
 
         $usuario->nombre = $request->nombre;
@@ -114,7 +135,6 @@ class AuthController extends Controller
             $usuario->password = bcrypt($request->password);
         }
 
-        // Si viene un nuevo Base64 en la petición, lo machacamos directo en Neon
         if ($request->filled('avatar')) {
             $usuario->avatar = $request->avatar;
         }
@@ -130,7 +150,7 @@ class AuthController extends Controller
                 'nick' => $usuario->nick,
                 'email' => $usuario->email,
                 'rol' => $usuario->rol,
-                'avatar_url' => $usuario->avatar, // Devolvemos el Base64 tal cual. ¡React lo pinta directo!
+                'avatar_url' => $usuario->avatar,
             ]
         ]);
     }

@@ -39,9 +39,10 @@ export default function RegisterForm() {
       const data = await response.json();
 
       if (!response.ok) {
+        // ✨ MODO PRO: Si Laravel devuelve errores de validación específicos, los unificamos limpiamente
         const msgs = data.errors
           ? Object.values(data.errors).flat().join(' ')
-          : data.message;
+          : data.message || 'Error al procesar el registro.';
         throw new Error(msgs);
       }
 
@@ -90,6 +91,12 @@ export default function RegisterForm() {
               placeholder={placeholder}
               style={{ borderRadius: 'var(--radius-md)', padding: '0.65rem' }}
             />
+            {/* 💡 AVISO VISUAL DE SEGURIDAD EN EL CAMPO CONTRASEÑA */}
+            {name === 'password' && (
+              <div className="form-text text-muted" style={{ fontSize: '0.78rem', lineHeight: '1.3' }}>
+                Requisito: Mínimo 8 caracteres, incluyendo letras, números y algún símbolo especial (ej. @, #, $, *, !).
+              </div>
+            )}
           </div>
         ))}
 

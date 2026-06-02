@@ -147,6 +147,10 @@ export default function PerfilForm({ user, onUpdate }) {
               placeholder="••••••••"
               style={{ borderRadius: 'var(--radius-md)' }}
             />
+            {/* 💡 TEXTO DE INSTRUCCIÓN POLÍTICA DE SEGURIDAD */}
+            <div className="form-text text-muted" style={{ fontSize: '0.75rem', lineHeight: '1.2' }}>
+              Debe contener al menos 8 caracteres, combinando letras, números y símbolos.
+            </div>
           </div>
 
           <div className="col-12 col-md-6">
@@ -172,7 +176,6 @@ export default function PerfilForm({ user, onUpdate }) {
         >
           {loading ? 'Guardando...' : '💾 Guardar Cambios'}
         </Button>
-
       </form>
     </div>
   );
