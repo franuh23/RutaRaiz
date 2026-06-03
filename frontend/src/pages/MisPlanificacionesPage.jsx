@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Container from '../components/layout/Container';
 import PlanificacionCard from '../components/planificacion/PlanificacionCard';
+import { apiFetch } from '../services/api';
 
 export default function MisPlanificacionesPage() {
   const { token, isAuthenticated, loading } = useAuth();
@@ -31,7 +32,7 @@ export default function MisPlanificacionesPage() {
       return;
     }
 
-    fetch('/api/planificaciones', {
+    apiFetch('/api/planificaciones', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
@@ -51,7 +52,7 @@ export default function MisPlanificacionesPage() {
   const handleEmpezarRuta = async (id) => {
     setActivandoId(id);
     try {
-      const response = await fetch(`/api/planificaciones/${id}/empezar`, {
+      const response = await apiFetch(`/api/planificaciones/${id}/empezar`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -82,7 +83,7 @@ export default function MisPlanificacionesPage() {
     if (!confirm('¿Seguro que quieres eliminar esta planificación?')) return;
 
     try {
-      const response = await fetch(`/api/planificaciones/${id}`, {
+      const response = await apiFetch(`/api/planificaciones/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

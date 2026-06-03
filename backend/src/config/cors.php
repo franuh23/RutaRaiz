@@ -20,7 +20,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://ruta-raiz.vercel.app/',
+        'https://ruta-raiz.vercel.app',
         'http://localhost:5173'
     ],
 

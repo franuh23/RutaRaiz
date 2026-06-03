@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { apiFetch } from '../services/api'; // 👈 AÑADIDO
 
 const AuthContext = createContext(null);
 
@@ -7,38 +8,28 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem('token') || null);
     const [loading, setLoading] = useState(true);
 
-    // 🚀 Función corregida para respetar el Base64 puro directo de Neon
     const formatearUsuario = (usuarioObjeto) => {
         if (!usuarioObjeto) return null;
-        
-        // Si lo que nos llega es la respuesta directa de /api/usuario, extraemos los datos limpios
         const datosReales = usuarioObjeto.data ? usuarioObjeto.data : usuarioObjeto;
-        
         const copiaUsuario = { ...datosReales };
-
-        // Aseguramos que la propiedad avatar_url contenga el Base64 limpio si no venía ya mapeada
         if (copiaUsuario.avatar && !copiaUsuario.avatar_url) {
             copiaUsuario.avatar_url = copiaUsuario.avatar;
         }
-        
         return copiaUsuario;
     };
 
-    // Validar si hay una sesión activa al arrancar la app
     useEffect(() => {
         const comprobarSesion = async () => {
             if (token) {
                 try {
-                    const response = await fetch('/api/usuario', {
+                    const response = await apiFetch('/api/usuario', { // 👈 CAMBIADO
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             'Accept': 'application/json'
                         }
                     });
-
                     if (response.ok) {
                         const usuarioData = await response.json();
-                        // Guardamos asegurando el formateo del avatar
                         setUser(formatearUsuario(usuarioData));
                     } else if (response.status === 401) {
                         ejecutarLimpiezaLocal();
@@ -49,13 +40,11 @@ export const AuthProvider = ({ children }) => {
             }
             setLoading(false);
         };
-
         comprobarSesion();
     }, []);
 
-    // Función para Iniciar Sesión
     const login = async (email, password) => {
-        const response = await fetch('/api/login', {
+        const response = await apiFetch('/api/login', { // 👈 CAMBIADO
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -63,16 +52,11 @@ export const AuthProvider = ({ children }) => {
             },
             body: JSON.stringify({ email, password })
         });
-
         const data = await response.json();
-
         if (!response.ok) {
             throw new Error(data.message || 'Error al iniciar sesión');
         }
-
-        // Formateamos el usuario antes de guardarlo en el estado global
         const usuarioProcesado = formatearUsuario(data.user);
-
         localStorage.setItem('token', data.access_token);
         setToken(data.access_token);
         setUser(usuarioProcesado);
@@ -88,7 +72,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         if (token) {
             try {
-                await fetch('/api/logout', {
+                await apiFetch('/api/logout', { // 👈 CAMBIADO
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,

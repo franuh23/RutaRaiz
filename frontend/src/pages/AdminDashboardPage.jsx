@@ -7,7 +7,8 @@ import AdminLocalizacionModal from '../components/admin/AdminLocalizacionModal';
 import AdminAlojamientoModal from '../components/admin/AdminAlojamientoModal';
 import AdminLocalizacionesAccordion from '../components/admin/AdminLocalizacionesAccordion';
 import AdminAlojamientosAccordion from '../components/admin/AdminAlojamientosAccordion';
-import AdminUsuarioRow from '../components/admin/AdminUsuarioRow'; // 🔌 Importamos la nueva fila
+import AdminUsuarioRow from '../components/admin/AdminUsuarioRow';
+import { apiFetch } from '../services/api';
 
 export default function AdminDashboardPage() {
   const { token } = useAuth();
@@ -28,10 +29,10 @@ export default function AdminDashboardPage() {
 
   const cargarDatos = () => {
     Promise.all([
-      fetch('/api/rutas').then(res => res.json()),
-      fetch('/api/localizaciones').then(res => res.json()),
-      fetch('/api/alojamientos').then(res => res.json()),
-      fetch('/api/usuarios', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()) // 👈 Fetch seguro a usuarios
+      apiFetch('/api/rutas').then(res => res.json()),
+      apiFetch('/api/localizaciones').then(res => res.json()),
+      apiFetch('/api/alojamientos').then(res => res.json()),
+      apiFetch('/api/usuarios', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()) // 👈 Fetch seguro a usuarios
     ])
       .then(([rutasData, locData, alojData, usuariosData]) => {
         setRutas(rutasData.data || []);
@@ -50,7 +51,7 @@ export default function AdminDashboardPage() {
   // Funciones de actualización de Usuarios
   const handleCambiarRolUsuario = async (id, nuevoRol) => {
     try {
-      const res = await fetch(`/api/usuarios/${id}`, {
+      const res = await apiFetch(`/api/usuarios/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ rol: nuevoRol })
@@ -62,7 +63,7 @@ export default function AdminDashboardPage() {
 
   const handleToggleActivoUsuario = async (id, nuevoEstado) => {
     try {
-      const res = await fetch(`/api/usuarios/${id}`, {
+      const res = await apiFetch(`/api/usuarios/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ activo: nuevoEstado })
@@ -75,7 +76,7 @@ export default function AdminDashboardPage() {
   const handleEliminarUsuario = async (id) => {
     if (!confirm('¿Seguro que quieres eliminar este usuario de la comunidad de forma irreversible?')) return;
     try {
-      const res = await fetch(`/api/usuarios/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await apiFetch(`/api/usuarios/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) cargarDatos();
       else { const err = await res.json(); alert(err.message || 'Error eliminando usuario.'); }
     } catch (err) { console.error(err); }
@@ -85,7 +86,7 @@ export default function AdminDashboardPage() {
   const handleEliminarRuta = async (id) => {
     if (!confirm('¿Seguro que deseas eliminar esta ruta de forma permanente?')) return;
     try {
-      const res = await fetch(`/api/rutas/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await apiFetch(`/api/rutas/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) cargarDatos();
     } catch (err) { console.error(err); }
   };
@@ -93,7 +94,7 @@ export default function AdminDashboardPage() {
   const handleEliminarLoc = async (id) => {
     if (!confirm('¿Seguro que deseas eliminar este hito geográfico?')) return;
     try {
-      const res = await fetch(`/api/localizaciones/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await apiFetch(`/api/localizaciones/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) cargarDatos();
     } catch (err) { console.error(err); }
   };
@@ -101,7 +102,7 @@ export default function AdminDashboardPage() {
   const handleEliminarAloj = async (id) => {
     if (!confirm('¿Seguro que deseas eliminar este alojamiento?')) return;
     try {
-      const res = await fetch(`/api/alojamientos/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await apiFetch(`/api/alojamientos/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) cargarDatos();
     } catch (err) { console.error(err); }
   };
@@ -110,7 +111,7 @@ export default function AdminDashboardPage() {
     const esEdicion = !!rutaEditando;
     const url = esEdicion ? `/api/rutas/${rutaEditando.id}` : '/api/rutas';
     try {
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method: esEdicion ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(formData)
@@ -127,7 +128,7 @@ export default function AdminDashboardPage() {
     const esEdicion = !!locEditando;
     const url = esEdicion ? `/api/localizaciones/${locEditando.id}` : '/api/localizaciones';
     try {
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method: esEdicion ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(formData)
@@ -140,7 +141,7 @@ export default function AdminDashboardPage() {
     const esEdicion = !!alojamientoEditando;
     const url = esEdicion ? `/api/alojamientos/${alojamientoEditando.id}` : '/api/alojamientos';
     try {
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method: esEdicion ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(formData)

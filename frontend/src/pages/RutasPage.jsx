@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import Container from '../components/layout/Container';
 import RouteCardSimple from '../components/ui/RouteCardSimple';
+import { apiFetch } from '../services/api';
 
 export default function RutasPage() {
   const [rutas, setRutas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/rutas')
+    apiFetch('/api/rutas')
       .then(res => res.json())
       .then(data => {
         setRutas(data.data || []);

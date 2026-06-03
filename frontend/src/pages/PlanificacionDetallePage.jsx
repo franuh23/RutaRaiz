@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Container from '../components/layout/Container';
 import ResumenPlanificacion from '../components/planificacion/ResumenPlanificacion';
 import EtapaCard from '../components/planificacion/EtapaCard';
+import { apiFetch } from '../services/api';
 
 export default function PlanificacionDetallePage() {
   const { id } = useParams();
@@ -22,7 +23,7 @@ export default function PlanificacionDetallePage() {
     if (loading) return;
     if (!token) return;
 
-    fetch(`/api/planificaciones/${id}`, {
+    apiFetch(`/api/planificaciones/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'

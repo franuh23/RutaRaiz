@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Container from '../components/layout/Container';
 import LocalizacionCard from '../components/ui/LocalizacionCard';
 import styles from './RutaDetailPage.module.css';
+import { apiFetch } from '../services/api';
 
 export default function RutaDetailPage() {
   const { id } = useParams();
@@ -11,7 +12,7 @@ export default function RutaDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/rutas/${id}`)
+    apiFetch(`/api/rutas/${id}`)
       .then(res => res.json())
       .then(data => {
         setRuta(data.data);

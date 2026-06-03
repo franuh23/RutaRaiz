@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Container from '../components/layout/Container';
 import AlojamientoFicha from '../components/alojamientos/AlojamientoFicha';
 import AlojamientoComentarios from '../components/alojamientos/AlojamientoComentarios';
+import { apiFetch } from '../services/api';
 
 export default function AlojamientoDetailPage() {
   const { id } = useParams();
@@ -13,7 +14,7 @@ export default function AlojamientoDetailPage() {
   const [loading, setLoading] = useState(true);
 
   const cargarAlojamiento = useCallback(() => {
-    fetch(`/api/alojamientos/${id}`)
+    apiFetch(`/api/alojamientos/${id}`)
       .then((res) => res.json())
       .then((resData) => {
         setAlojamiento(resData.data);
@@ -32,7 +33,7 @@ export default function AlojamientoDetailPage() {
   const handleEnviarComentario = async (texto) => {
     if (!texto.trim()) return;
     try {
-      const res = await fetch('/api/comentarios-alojamiento', {
+      const res = await apiFetch('/api/comentarios-alojamiento', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +63,7 @@ export default function AlojamientoDetailPage() {
 
   const handleBorrarComentario = async (comentarioId) => {
     try {
-      const res = await fetch(`/api/comentarios-alojamiento/${comentarioId}`, {
+      const res = await apiFetch(`/api/comentarios-alojamiento/${comentarioId}`, {
         method: 'DELETE',
         headers: {
           'Accept': 'application/json',

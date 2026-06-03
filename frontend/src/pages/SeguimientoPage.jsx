@@ -5,6 +5,7 @@ import Container from '../components/layout/Container';
 import Button from '../components/ui/Button';
 import TarjetaClima from '../components/seguimiento/TarjetaClima';
 import LineaProgreso from '../components/seguimiento/LineaProgreso';
+import { apiFetch } from '../services/api';
 
 export default function SeguimientoPage() {
     const { token, loading } = useAuth();
@@ -21,7 +22,7 @@ export default function SeguimientoPage() {
         }
 
         // 🚀 SIMPLIFICADO: Buscamos directamente las planificaciones para pescar la activa
-        fetch('/api/planificaciones', {
+        apiFetch('/api/planificaciones', {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json'
@@ -34,7 +35,7 @@ export default function SeguimientoPage() {
 
                 if (activa) {
                     // Cargamos el detalle completo con el ordenamiento SQL reparado del show
-                    fetch(`/api/planificaciones/${activa.id}`, {
+                    apiFetch(`/api/planificaciones/${activa.id}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             'Accept': 'application/json'
@@ -60,7 +61,7 @@ export default function SeguimientoPage() {
     const handleToggleEtapa = async (etapaId) => {
         if (!rutaActiva) return;
         try {
-            const response = await fetch(`/api/planificaciones/${rutaActiva.id}/etapas/${etapaId}/toggle`, {
+            const response = await apiFetch(`/api/planificaciones/${rutaActiva.id}/etapas/${etapaId}/toggle`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -86,7 +87,7 @@ export default function SeguimientoPage() {
         if (!rutaActiva || !window.confirm('¿Seguro que deseas detener el seguimiento de esta ruta? Puedes reanudarla cuando quieras.')) return;
         setParando(true);
         try {
-            const response = await fetch(`/api/planificaciones/${rutaActiva.id}/parar`, {
+            const response = await apiFetch(`/api/planificaciones/${rutaActiva.id}/parar`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -108,7 +109,7 @@ export default function SeguimientoPage() {
         if (!window.confirm('🎉 ¡Felicidades! ¿Deseas dar por concluido este viaje y guardarlo en tu historial de éxitos?')) return;
         setParando(true);
         try {
-            const response = await fetch(`/api/planificaciones/${rutaActiva.id}/finalizar`, {
+            const response = await apiFetch(`/api/planificaciones/${rutaActiva.id}/finalizar`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

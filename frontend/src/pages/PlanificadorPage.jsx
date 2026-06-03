@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Container from '../components/layout/Container';
 import FormularioPlanificador from '../components/planificacion/FormularioPlanificador';
 import ResultadoPlanificador from '../components/planificacion/ResultadoPlanificador';
+import { apiFetch } from '../services/api';
 
 export default function PlanificadorPage() {
   const { token, isAuthenticated } = useAuth();
@@ -47,7 +48,7 @@ export default function PlanificadorPage() {
 
   // Cargar lista de rutas inicial
   useEffect(() => {
-    fetch('/api/rutas')
+    apiFetch('/api/rutas')
       .then(res => res.json())
       .then(data => {
         const rutasData = data.data || [];
@@ -97,7 +98,7 @@ export default function PlanificadorPage() {
       if (tipoPlanificacion !== 'destino_ritmo') queryParams += `&dias_disponibles=${diasDisponibles}`;
 
       // Reutiliza la lógica de previsualización pasando los nuevos flags
-      const response = await fetch(`/api/rutas/planificar?${queryParams}`);
+      const response = await apiFetch(`/api/rutas/planificar?${queryParams}`);
       const data = await response.json();
       if (response.ok) {
         setEtapas(data);
@@ -139,7 +140,7 @@ export default function PlanificadorPage() {
     };
 
     try {
-      const response = await fetch('/api/planificaciones', {
+      const response = await apiFetch('/api/planificaciones', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

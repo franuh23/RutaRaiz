@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ComunidadCard from '../components/comunidad/ComunidadCard';
+import { apiFetch } from '../services/api';
 
 export default function ComunidadView() {
   const { token, usuario } = useAuth(); // Sacamos el token y los datos del usuario logueado
@@ -15,7 +16,7 @@ export default function ComunidadView() {
 
   const fetchPublicas = async () => {
     try {
-      const res = await fetch('/api/comunidad/planificaciones', {
+      const res = await apiFetch('/api/comunidad/planificaciones', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -32,7 +33,7 @@ export default function ComunidadView() {
   // Gestionar el Like en tiempo real (Optimistic UI update)
   const handleLike = async (id) => {
     try {
-      const res = await fetch(`/api/comunidad/planificaciones/${id}/like`, {
+      const res = await apiFetch(`/api/comunidad/planificaciones/${id}/like`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -60,7 +61,7 @@ export default function ComunidadView() {
   const handleClonar = async (id) => {
     setClonandoId(id);
     try {
-      const res = await fetch(`/api/comunidad/planificaciones/${id}/clonar`, {
+      const res = await apiFetch(`/api/comunidad/planificaciones/${id}/clonar`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });

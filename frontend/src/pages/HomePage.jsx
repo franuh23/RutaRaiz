@@ -4,6 +4,7 @@ import Container from '../components/layout/Container';
 import HeroSection from '../components/sections/HeroSection';
 import RoutesPreviewSection from '../components/sections/RoutesPreviewSection';
 import StatsGeneralSection from '../components/sections/StatsGeneralSection';
+import { apiFetch } from '../services/api';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -15,9 +16,9 @@ export default function HomePage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/rutas').then(res => res.json()),
-      fetch('/api/localizaciones').then(res => res.json()),
-      fetch('/api/alojamientos').then(res => res.json())
+      apiFetch('/api/rutas').then(res => res.json()),
+      apiFetch('/api/localizaciones').then(res => res.json()),
+      apiFetch('/api/alojamientos').then(res => res.json())
     ])
       .then(([rutasData, locsData, alojsData]) => {
         const todasLasRutas = rutasData.data || [];

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
+import { apiFetch } from '../../services/api';
 
 export default function PlanificacionCard({ p, onVer, onEliminar, onEmpezar, activandoId }) {
   const { token } = useAuth();
@@ -36,7 +37,7 @@ export default function PlanificacionCard({ p, onVer, onEliminar, onEmpezar, act
     setPublicando(true);
     try {
       const nuevoEstado = !isPublic;
-      const response = await fetch(`/api/planificaciones/${id}`, {
+      const response = await apiFetch(`/api/planificaciones/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -64,7 +65,7 @@ export default function PlanificacionCard({ p, onVer, onEliminar, onEmpezar, act
     if (!token) return;
     setBajandoPdf(true);
     try {
-      const response = await fetch(`/api/planificaciones/${id}/pdf`, {
+      const response = await apiFetch(`/api/planificaciones/${id}/pdf`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -93,7 +94,7 @@ export default function PlanificacionCard({ p, onVer, onEliminar, onEmpezar, act
     if (!token) return;
     setBajandoExcel(true);
     try {
-      const response = await fetch(`/api/planificaciones/${id}/excel`, {
+      const response = await apiFetch(`/api/planificaciones/${id}/excel`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

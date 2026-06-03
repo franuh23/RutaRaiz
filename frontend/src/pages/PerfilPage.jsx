@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import Container from '../components/layout/Container';
 import PerfilInfo from '../components/profile/PerfilInfo';
 import PerfilForm from '../components/profile/PerfilForm';
+import { apiFetch } from '../services/api';
 
 export default function PerfilPage() {
   // Extraemos 'setUser' de tu contexto para poder actualizar la memoria de React al instante
@@ -34,7 +35,7 @@ export default function PerfilPage() {
     }
 
     try {
-      const res = await fetch('/api/usuario/update', {
+      const res = await apiFetch('/api/usuario/update', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
