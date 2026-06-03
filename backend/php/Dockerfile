@@ -1,6 +1,5 @@
 FROM php:8.4-fpm-alpine
 
-# Dependencias del sistema (zip, intl, etc.) + herramientas + PostgreSQL
 RUN apk add --no-cache \
     bash \
     git \
@@ -10,7 +9,11 @@ RUN apk add --no-cache \
     libzip-dev \
     mysql-client \
     postgresql-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
   && docker-php-ext-configure intl \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
   && docker-php-ext-install -j$(nproc) \
     pdo \
     pdo_mysql \
@@ -18,9 +21,8 @@ RUN apk add --no-cache \
     mbstring \
     intl \
     zip \
+    gd \
   && rm -rf /var/cache/apk/*
 
-# Composer (copiado desde la imagen oficial)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
 WORKDIR /var/www
