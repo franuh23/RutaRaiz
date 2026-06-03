@@ -34,5 +34,9 @@ COPY . .
 RUN composer install --optimize-autoloader --no-interaction
 RUN npm install && npm run build
 
+# Permisos necesarios para Laravel
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
 EXPOSE 8000
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD php artisan config:clear && php artisan serve --host=0.0.0.0 --port=8000
