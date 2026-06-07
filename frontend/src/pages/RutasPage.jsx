@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Container from '../components/layout/Container';
 import RouteCardSimple from '../components/ui/RouteCardSimple';
 import { apiFetch } from '../services/api';
+// Catálogo completo de itinerarios.
 
 export default function RutasPage() {
   const [rutas, setRutas] = useState([]);
@@ -30,7 +31,6 @@ export default function RutasPage() {
 
   return (
     <Container className="py-4">
-      {/* Cabecera estilizada de la sección */}
       <div className="mb-4 text-start border-bottom pb-2">
         <h1 className="fw-bold m-0" style={{ fontFamily: 'var(--font-display)', color: 'var(--verde-bosque)' }}>
           Explorar Rutas
@@ -40,7 +40,6 @@ export default function RutasPage() {
         </p>
       </div>
 
-      {/* Lista vertical flexible usando las utilidades nativas de Bootstrap 5 */}
       <div className="d-flex flex-column gap-3">
         {rutas.length > 0 ? (
           rutas.map(ruta => (

@@ -1,5 +1,6 @@
 import React from 'react';
 import Badge from '../ui/Badge';
+// Muestra tarjetas de una planificacion
 
 export default function ResumenPlanificacion({ planificacion }) {
   const { fecha_inicio, km_dia = 0, dias_totales = 0, etapas = [] } = planificacion || {};
@@ -28,7 +29,6 @@ export default function ResumenPlanificacion({ planificacion }) {
               <span className="d-block text-uppercase text-muted fw-bold mb-1" style={{ fontSize: '0.72rem', letterSpacing: '0.05em' }}>
                 {item.label}
               </span>
-              {/* Añadimos un contenedor semántico fino para mostrar los datos de la ficha */}
               <div className="mt-1">
                 <Badge variant={item.tag} size="sm" style={{ letterSpacing: '0' }} className="fw-bold fs-7">
                   {item.valor}

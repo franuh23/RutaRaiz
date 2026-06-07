@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ComunidadCard from '../components/comunidad/ComunidadCard';
 import { apiFetch } from '../services/api';
+// Vista del muro de la comunidad, delega en ComunidadCard.
 
 export default function ComunidadView() {
-  const { token, usuario } = useAuth(); // Sacamos el token y los datos del usuario logueado
+  const { token, usuario } = useAuth();
   const [planificaciones, setPlanificaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [clonandoId, setClonandoId] = useState(null);
 
-  // Cargar las rutas de la comunidad al entrar
   useEffect(() => {
     fetchPublicas();
   }, [token]);
@@ -30,7 +30,6 @@ export default function ComunidadView() {
     }
   };
 
-  // Gestionar el Like en tiempo real (Optimistic UI update)
   const handleLike = async (id) => {
     try {
       const res = await apiFetch(`/api/comunidad/planificaciones/${id}/like`, {
@@ -40,7 +39,6 @@ export default function ComunidadView() {
       const data = await res.json();
       
       if (res.ok) {
-        // Actualizamos la tarjeta afectada en el estado de React al instante
         setPlanificaciones(prev => prev.map(p => {
           if (p.id === id) {
             return {
@@ -57,7 +55,6 @@ export default function ComunidadView() {
     }
   };
 
-  // Gestionar la clonación de la ruta
   const handleClonar = async (id) => {
     setClonandoId(id);
     try {

@@ -12,12 +12,11 @@ use Illuminate\Support\Facades\Auth;
 class ComunidadController extends Controller
 {
     /**
-     * LISTAR PLANIFICACIONES PÚBLICAS
-     * Devuelve todas las planificaciones compartidas por la comunidad con el conteo de likes
+     * List all public planifications with like counts.
      */
     public function index()
     {
-        // Conectamos las relaciones reales para poder sacar los nombres de los pueblos
+        // Cargar relaciones necesarias para obtener los nombres de localizaciones
         $publicas = Planificacion::with(['ruta', 'usuario', 'etapas.localizacionInicio', 'etapas.localizacionFin'])
             ->withCount('likes')
             ->where('is_public', true)
@@ -26,6 +25,7 @@ class ComunidadController extends Controller
 
         $usuarioId = Auth::id();
 
+        // Mapear los datos manualmente para incluir información personalizada
         $data = $publicas->map(function ($p) use ($usuarioId) {
             return [
                 'id' => $p->id,
@@ -39,7 +39,7 @@ class ComunidadController extends Controller
                 'ha_dado_like' => \App\Models\PlanificacionLike::where('usuario_id', $usuarioId)
                     ->where('planificacion_id', $p->id)
                     ->exists(),
-                // 🚀 MAPEADO REAL: Sacamos los nombres de la relación de la BD
+                // Mapear etapas con sus localizaciones y alojamientos
                 'etapas' => $p->etapas->map(function ($e) {
                     return [
                         'dia' => $e->dia,
@@ -58,12 +58,11 @@ class ComunidadController extends Controller
     }
 
     /**
-     * ALTERNAR LIKE (Toggle Like)
-     * Si no tiene like se lo da, si ya lo tiene se lo quita
+     * Toggle like on a public planification.
      */
     public function toggleLike(string $id)
     {
-        // Comprobamos que la planificación existe y es pública
+        // Verificar que la planificación existe y es pública
         $planificacion = Planificacion::where('is_public', true)->findOrFail($id);
         $usuarioId = Auth::id();
 
@@ -90,28 +89,27 @@ class ComunidadController extends Controller
     }
 
     /**
-     * BOTÓN CLONAR PLANIFICACIÓN ("Añadir a mi mochila")
-     * Duplica la ruta de otro usuario y la guarda en las tuyas privadas
+     * Clone a public planification to the authenticated user's collection.
      */
     public function clonar(string $id)
     {
-        // Buscamos la planificación pública con todas sus etapas asociadas
+        // Buscar la planificación pública con sus etapas
         $original = Planificacion::with('etapas')->where('is_public', true)->findOrFail($id);
         $usuarioId = Auth::id();
 
-        // Evitamos que te clones a ti mismo por lógica de interfaz
+        // Evitar clonar la propia planificación
         if ($original->usuario_id === $usuarioId) {
             return response()->json(['error' => 'No puedes clonar tu propia planificación.'], 400);
         }
 
-        // ⚡ TRUCO REPLICATE DE LARAVEL: Duplica el objeto en memoria conservando las propiedades
+        // Duplicar la planificación
         $clon = $original->replicate();
-        $clon->usuario_id = $usuarioId; // Cambiamos el dueño al usuario logueado
-        $clon->is_public = false; // Nace siendo una copia privada del usuario
+        $clon->usuario_id = $usuarioId;
+        $clon->is_public = false;
         $clon->original_id = $original->id;
         $clon->save();
 
-        // Duplicamos en cascada cada una de las etapas originales asociándolas al nuevo clon
+        // Duplicar las etapas asociadas
         foreach ($original->etapas as $etapaOriginal) {
             $nuevaEtapa = $etapaOriginal->replicate();
             $nuevaEtapa->planificacion_id = $clon->id;

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 class ComentarioAlojamientoController extends Controller
 {
     /**
-     * Guardar un nuevo comentario para un alojamiento.
+     * Store a new comment for an accommodation.
      */
     public function store(Request $request)
     {
@@ -19,15 +19,15 @@ class ComentarioAlojamientoController extends Controller
             'texto' => 'required|string|max:1000',
         ]);
 
-        // Guardamos el comentario inyectando directamente el ID del usuario autenticado
+        // Guardar el comentario con el usuario autenticado
         $comentario = ComentarioAlojamiento::create([
             'usuario_id' => Auth::id(),
             'alojamiento_id' => $request->alojamiento_id,
             'texto' => $request->texto,
-            'activo' => true // Activo por defecto
+            'activo' => true
         ]);
 
-        // Lo volvemos a cargar con la relación del usuario (para traer su nick en caliente)
+        // Cargar la relación con el usuario para obtener su nick
         $comentario->load('usuario');
 
         return response()->json([
@@ -38,7 +38,7 @@ class ComentarioAlojamientoController extends Controller
     }
 
     /**
-     * Desactivar (borrado lógico) un comentario si el usuario es el propietario o admin.
+     * Soft delete a comment (owner or admin only).
      */
     public function destroy(string $id)
     {
@@ -52,6 +52,7 @@ class ComentarioAlojamientoController extends Controller
             ], 403);
         }
 
+        // Desactivar el comentario
         $comentario->update(['activo' => false]);
 
         return response()->json([

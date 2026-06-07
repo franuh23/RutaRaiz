@@ -7,11 +7,13 @@ use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules\Password; // 🚀 REGLA MODO 3.1 PRO DE SEGURIDAD
+use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
-    // Registro de usuarios públicos
+    /**
+     * Register a new user.
+     */
     public function register(Request $request)
     {
         $request->validate([
@@ -19,8 +21,6 @@ class AuthController extends Controller
             'nombre' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:usuarios',
-
-            // 🔒 CONTRASEÑA BLINDADA
             'password' => [
                 'required',
                 'string',
@@ -37,6 +37,7 @@ class AuthController extends Controller
             'nick.unique' => 'Este nick ya está siendo utilizado por otro usuario.',
         ]);
 
+        // Crear el usuario
         $usuario = Usuario::create([
             'nick' => $request->nick,
             'nombre' => $request->nombre,
@@ -47,6 +48,7 @@ class AuthController extends Controller
             'activo' => true,
         ]);
 
+        // Generar token de acceso
         $token = $usuario->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -56,7 +58,9 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // Inicio de sesión Blindado contra Baneos 🔒
+    /**
+     * Authenticate a user and generate an access token.
+     */
     public function login(Request $request)
     {
         $request->validate([
@@ -64,20 +68,24 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
+        // Verificar credenciales
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'message' => 'Credenciales inválidas'
             ], 401);
         }
 
+        // Obtener el usuario
         $usuario = Usuario::where('email', $request->email)->firstOrFail();
 
+        // Verificar si la cuenta está activa
         if (!$usuario->activo) {
             return response()->json([
                 'message' => 'Tu cuenta en RutaRaíz ha sido suspendida temporal o permanentemente por los administradores.'
             ], 403);
         }
 
+        // Generar token de acceso
         $token = $usuario->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -87,9 +95,12 @@ class AuthController extends Controller
         ]);
     }
 
-    // Cerrar sesión
+    /**
+     * Revoke the current access token.
+     */
     public function logout(Request $request)
     {
+        // Eliminar el token actual
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
@@ -97,7 +108,9 @@ class AuthController extends Controller
         ]);
     }
 
-    // Actualizar perfil
+    /**
+     * Update the authenticated user's profile.
+     */
     public function updatePerfil(Request $request)
     {
         $usuario = $request->user();
@@ -108,8 +121,6 @@ class AuthController extends Controller
             'nick' => 'required|string|max:255|unique:usuarios,nick,' . $usuario->id,
             'email' => 'required|string|email|max:255|unique:usuarios,email,' . $usuario->id,
             'avatar' => 'nullable|string',
-
-            // 🔒 CONTRASEÑA EN PERFIL
             'password' => [
                 'nullable',
                 'string',
@@ -126,15 +137,18 @@ class AuthController extends Controller
             'email.unique' => 'Este correo electrónico ya está registrado.',
         ]);
 
+        // Actualizar datos básicos
         $usuario->nombre = $request->nombre;
         $usuario->apellidos = $request->apellidos;
         $usuario->nick = $request->nick;
         $usuario->email = $request->email;
 
+        // Actualizar contraseña si se proporciona
         if ($request->filled('password')) {
             $usuario->password = bcrypt($request->password);
         }
 
+        // Actualizar avatar si se proporciona
         if ($request->filled('avatar')) {
             $usuario->avatar = $request->avatar;
         }

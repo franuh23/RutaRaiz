@@ -1,5 +1,7 @@
 import React from 'react';
 import Button from '../ui/Button';
+// Formulario dinámico del planificador.
+// Modifica los inputs visibles según el tipoPlanificacion seleccionado y envía las variables de itinerario mediante onSubmit.
 
 export default function FormularioPlanificador({
   rutas = [],
@@ -16,7 +18,6 @@ export default function FormularioPlanificador({
   setFechaInicio,
   onSubmit,
   loading,
-  // 🚀 NUEVAS PROPS MODO 3.1 PRO
   tipoPlanificacion,
   setTipoPlanificacion,
   diasDisponibles,
@@ -27,7 +28,6 @@ export default function FormularioPlanificador({
   return (
     <div className="card shadow-sm border-0 p-4 mb-4 bg-white" style={{ borderRadius: 'var(--radius-lg)' }}>
       
-      {/* 🎛️ SELECTOR VISUAL DE MODO (Tabs corporativos) */}
       <div className="d-flex btn-group mb-4 bg-light p-1" style={{ borderRadius: 'var(--radius-md)' }}>
         <button
           type="button"
@@ -57,8 +57,6 @@ export default function FormularioPlanificador({
 
       <form onSubmit={onSubmit}>
         <div className="row g-3">
-          
-          {/* Campo: Selecciona tu ruta (Siempre visible) */}
           <div className="col-12 col-md-6">
             <label className="form-label fw-bold text-dark small">Selecciona tu ruta:</label>
             <select className="form-select" value={selectedRuta} onChange={(e) => setSelectedRuta(e.target.value)} required>
@@ -69,7 +67,6 @@ export default function FormularioPlanificador({
             </select>
           </div>
 
-          {/* Campo: Punto de inicio (Siempre visible) */}
           <div className="col-12 col-md-6">
             <label className="form-label fw-bold text-dark small">Punto de inicio:</label>
             <select className="form-select" value={inicioId} onChange={(e) => setInicioId(e.target.value)} required disabled={!selectedRuta}>
@@ -82,7 +79,6 @@ export default function FormularioPlanificador({
             </select>
           </div>
 
-          {/* 🎯 CONDICIONAL: Punto de fin (Se oculta en el modo 'dias_ritmo' porque se autocalcula) */}
           {tipoPlanificacion !== 'dias_ritmo' && (
             <div className="col-12 col-md-6 animate__animated animate__fadeIn">
               <label className="form-label fw-bold text-dark small">Punto de fin:</label>
@@ -91,7 +87,7 @@ export default function FormularioPlanificador({
                 value={finId} 
                 onChange={(e) => setFinId(e.target.value)} 
                 disabled={!selectedRuta}
-                required={tipoPlanificacion === 'destino_dias'} // Obligatorio si calcula ritmo
+                required={tipoPlanificacion === 'destino_dias'}
               >
                 <option value="">{tipoPlanificacion === 'destino_ritmo' ? 'Hasta el final del camino (Opcional)' : 'Selecciona hito de destino (Obligatorio)'}</option>
                 {localizaciones.map(loc => (
@@ -103,7 +99,6 @@ export default function FormularioPlanificador({
             </div>
           )}
 
-          {/* ⏳ CONDICIONAL: Días disponibles (Se muestra si el tiempo está limitado) */}
           {tipoPlanificacion !== 'destino_ritmo' && (
             <div className="col-12 col-md-6 animate__animated animate__fadeIn">
               <label className="form-label fw-bold text-dark small">Días disponibles para caminar:</label>
@@ -119,7 +114,6 @@ export default function FormularioPlanificador({
             </div>
           )}
 
-          {/* 👣 CONDICIONAL: Ritmo de marcha (Se oculta en 'destino_dias' porque lo calcula Laravel) */}
           {tipoPlanificacion !== 'destino_dias' && (
             <div className="col-12 col-md-6 animate__animated animate__fadeIn">
               <label className="form-label fw-bold text-dark small">Ritmo de marcha (Km / día):</label>
@@ -135,7 +129,6 @@ export default function FormularioPlanificador({
             </div>
           )}
 
-          {/* Campo: Fecha de inicio (Siempre visible) */}
           <div className="col-12">
             <label className="form-label fw-bold text-dark small">Fecha de inicio de caminata:</label>
             <input

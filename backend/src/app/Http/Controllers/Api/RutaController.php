@@ -25,13 +25,14 @@ class RutaController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(RutaPost $request) // 🔌 Conectamos tu Form Request corregido
+    public function store(RutaPost $request)
     {
+        // Verificar permisos de administrador
         if (Auth::user()->rol !== 'admin') {
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
-        // Creamos la ruta usando directamente los datos limpios y validados (inicio, fin, kilometros, etc.)
+        // Crear la ruta con los datos validados
         $ruta = Ruta::create($request->validated());
 
         return response()->json([
@@ -52,15 +53,14 @@ class RutaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(RutaPut $request, string $id) // 🔌 Conectamos tu Form Request corregido
+    public function update(RutaPut $request, string $id)
     {
+        // Verificar permisos de administrador
         if (Auth::user()->rol !== 'admin') {
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
         $ruta = Ruta::findOrFail($id);
-
-        // Actualizamos con las reglas adaptadas del PUT (donde los campos pueden ser opcionales al editar)
         $ruta->update($request->validated());
 
         return response()->json([
@@ -74,6 +74,7 @@ class RutaController extends Controller
      */
     public function destroy(string $id)
     {
+        // Verificar permisos de administrador
         if (Auth::user()->rol !== 'admin') {
             return response()->json(['message' => 'No autorizado'], 403);
         }
@@ -87,11 +88,11 @@ class RutaController extends Controller
     }
 
     /**
-     * Calcula las etapas de una ruta según los parámetros del usuario (Simulador al vuelo)
+     * Calculate route stages based on user parameters
      */
     public function planificar(PlanificarRequest $request)
     {
-        // Cargamos las localizaciones con sus respectivos alojamientos
+        // Cargar la ruta con sus localizaciones y alojamientos
         $ruta = Ruta::with('localizaciones.alojamientos')->findOrFail($request->ruta_id);
         $localizaciones = $ruta->localizaciones->sortBy('distancia_desde_inicio')->values();
 
@@ -99,15 +100,15 @@ class RutaController extends Controller
         $finId = $request->localizacion_fin_id;
         $tipo = $request->tipo_planificacion;
 
-        // Buscar el índice físico de salida
+        // Buscar el índice de inicio
         $indiceInicio = $localizaciones->search(fn($loc) => $loc->id == $inicioId);
         if ($indiceInicio === false) {
             return response()->json(['error' => 'Localización de inicio no válida'], 422);
         }
 
-        // 🚀 REPARADO: Control estricto de fin según el modo y si viene vacío
+        // Determinar el índice de fin según el tipo de planificación
         if ($tipo === 'dias_ritmo' || (empty($finId) && $tipo === 'destino_ritmo')) {
-            $indiceFin = $localizaciones->count() - 1; // Último hito de la ruta por defecto
+            $indiceFin = $localizaciones->count() - 1;
         } else {
             $indiceFin = $localizaciones->search(fn($loc) => $loc->id == $finId);
             if ($indiceFin === false || $indiceInicio >= $indiceFin) {
@@ -115,7 +116,7 @@ class RutaController extends Controller
             }
         }
 
-        // 🧮 PRE-CÁLCULO MATEMÁTICO DE RITMO (Variante 2: Reto Crono)
+        // Calcular variables según el tipo de planificación
         $kmDia = $request->km_dia;
         $diasMaximos = $request->dias_disponibles;
 
@@ -124,15 +125,15 @@ class RutaController extends Controller
             $kmDia = $diasMaximos > 0 ? round($distanciaTotalTramo / $diasMaximos, 2) : 20;
         }
 
+        // Generar etapas
         $etapas = [];
         $dia = 1;
         $i = $indiceInicio;
         $indiceDetencionReal = $indiceFin;
 
-        // 👣 BUCLE INTELIGENTE CON REPARTO EQUITATIVO DINÁMICO
         while ($i < $indiceFin) {
 
-            // 🛑 FRENO DE MANO DE JORNADAS
+            // Límite de días en modo días_ritmo o destino_dias
             if (($tipo === 'dias_ritmo' || $tipo === 'destino_dias') && $dia > $diasMaximos) {
                 $indiceDetencionReal = $i;
                 break;
@@ -142,20 +143,17 @@ class RutaController extends Controller
             $mejorDestinoIndice = $i + 1;
             $menorDiferencia = null;
 
-            // 🚀 RECALCULO DE OBJETIVO DÍA A DÍA (Para evitar el efecto bola de nieve en Reto Crono)
+            // Recalcular km_día en modo destino_dias para distribuir equitativamente
             if ($tipo === 'destino_dias') {
                 $distanciaRestante = $localizaciones[$indiceFin]->distancia_desde_inicio - $inicioEtapa->distancia_desde_inicio;
                 $diasRestantes = ($diasMaximos - $dia) + 1;
                 $kmDia = $diasRestantes > 0 ? ($distanciaRestante / $diasRestantes) : $distanciaRestante;
             }
 
-            // Buscamos cuál de las siguientes paradas se ajusta mejor al objetivo actual
+            // Buscar la mejor localización para finalizar la etapa
             for ($j = $i + 1; $j <= $indiceFin; $j++) {
                 $distanciaTotalEtapa = $localizaciones[$j]->distancia_desde_inicio - $inicioEtapa->distancia_desde_inicio;
-
                 $diferencia = abs($distanciaTotalEtapa - $kmDia);
-
-                // Margen flexible: si es el último día, permitimos llegar al final
                 $limiteMaximoPasarse = ($tipo === 'destino_dias' && $dia == $diasMaximos) ? $kmDia + 30 : $kmDia + 6;
 
                 if ($menorDiferencia === null || $diferencia < $menorDiferencia) {
@@ -185,12 +183,12 @@ class RutaController extends Controller
             $i = $mejorDestinoIndice;
         }
 
-        // Si salimos por freno de mano, recalculamos el índice geográfico real donde murió la estimación
+        // Determinar el índice final real
         $finalRealIndice = ($tipo === 'dias_ritmo' || $tipo === 'destino_dias') ? $indiceDetencionReal : $indiceFin;
 
         return response()->json([
             'etapas' => $etapas,
-            'km_dia' => round($kmDia, 1), // Mandamos el ritmo real (o el calculado) para las tarjetas de React
+            'km_dia' => round($kmDia, 1),
             'total_km' => round($localizaciones[$finalRealIndice]->distancia_desde_inicio - $localizaciones[$indiceInicio]->distancia_desde_inicio, 1),
             'dias_totales' => count($etapas)
         ]);

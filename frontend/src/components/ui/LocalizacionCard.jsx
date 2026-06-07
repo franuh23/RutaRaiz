@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './LocalizacionCard.module.css';
+// Tarjeta de hito geográfico.
 
 export default function LocalizacionCard({ localizacion }) {
   const [alojamientosOpen, setAlojamientosOpen] = useState(false);

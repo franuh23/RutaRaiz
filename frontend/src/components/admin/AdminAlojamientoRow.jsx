@@ -1,8 +1,9 @@
 import React from 'react';
+// Representa una fila individual en la tabla de administración de alojamientos. 
+// Recibe el objeto alojamiento y los métodos onEditar y onEliminar para renderizar los datos formateados y despachar las acciones al componente padre.
 
 export default function AdminAlojamientoRow({ alojamiento, onEditar, onEliminar }) {
   
-  // Helper para pintar badges limpios según el tipo de alojamiento oficial
   const getTipoBadge = (tipo) => {
     const t = tipo ? tipo.toLowerCase() : 'albergue';
     switch (t) {
@@ -10,7 +11,7 @@ export default function AdminAlojamientoRow({ alojamiento, onEditar, onEliminar 
       case 'hotel': return 'bg-primary text-white';
       case 'hostal': return 'bg-info text-dark';
       case 'casa_rural': return 'bg-warning text-dark';
-      default: return 'bg-secondary text-white'; // camping o refugio
+      default: return 'bg-secondary text-white';
     }
   };
 

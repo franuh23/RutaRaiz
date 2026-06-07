@@ -1,4 +1,5 @@
 import React from 'react';
+// Renderiza un timeline interactivo de etapas.
 
 export default function LineaProgreso({ etapas = [], onToggle }) {
   if (etapas.length === 0) return null;
@@ -7,21 +8,12 @@ export default function LineaProgreso({ etapas = [], onToggle }) {
     <div className="position-relative ps-2 pt-2">
       {etapas.map((etapa, index) => {
         const { id, dia, inicio, fin, distancia, completada } = etapa;
-
-        // 🚀 REGLA DE COHERENCIA EN CASCADA
-        // Se puede pulsar si es el primer día O SI el día anterior ya está completado
         const diaAnteriorHecho = index === 0 ? true : etapas[index - 1].completada;
-        
-        // Regla para poder desmarcar: solo se puede desmarcar si el día siguiente NO está hecho
         const diaSiguienteHecho = index === etapas.length - 1 ? false : etapas[index + 1].completada;
-
-        // Combinamos ambas: el botón está habilitado si se puede empezar o si se puede desmarcar
         const canToggle = (!completada && diaAnteriorHecho) || (completada && !diaSiguienteHecho);
 
         return (
           <div key={id || index} className="d-flex mb-4 position-relative align-items-start gap-3" style={{ opacity: canToggle ? 1 : 0.5 }}>
-            
-            {/* LÍNEA CONECTOR VERTICAL */}
             {index !== etapas.length - 1 && (
               <div 
                 className="position-absolute" 
@@ -37,10 +29,9 @@ export default function LineaProgreso({ etapas = [], onToggle }) {
               />
             )}
 
-            {/* 🔘 CÍRCULO / CHECKBOX INTERACTIVO (Con seguro disabled) */}
             <button
               onClick={() => canToggle && onToggle(id)}
-              disabled={!canToggle} // 🚀 Forzamos el bloqueo nativo de HTML
+              disabled={!canToggle}
               className="d-flex align-items-center justify-content-center text-white border-0 p-0 shadow-sm"
               style={{
                 width: '42px',
@@ -63,7 +54,6 @@ export default function LineaProgreso({ etapas = [], onToggle }) {
               )}
             </button>
 
-            {/* DESCRIPCIÓN GEOGRÁFICA */}
             <div 
               className="p-3 border flex-grow-1 bg-white d-flex justify-content-between align-items-center flex-wrap gap-2"
               style={{ 

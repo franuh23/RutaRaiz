@@ -5,6 +5,7 @@ import HeroSection from '../components/sections/HeroSection';
 import RoutesPreviewSection from '../components/sections/RoutesPreviewSection';
 import StatsGeneralSection from '../components/sections/StatsGeneralSection';
 import { apiFetch } from '../services/api';
+// Componente de la página de inicio, recopila mediante Promise.all.
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -48,15 +49,10 @@ export default function HomePage() {
 
   return (
     <>
-      {/* 🏔️ 1. Hero Section: Ya ocupa todo el ancho de forma nativa */}
       <HeroSection onPlanificar={() => navigate('/planificador')} />
-      
-      {/* 🧭 2. Escaparate de Rutas: Lo sacamos del Container global para que su fondo crema ocupe el 100% del ancho */}
       {rutasDestacadas.length > 0 && (
         <RoutesPreviewSection rutas={rutasDestacadas} />
       )}
-      
-      {/* 📊 3. Estadísticas Generales: También fuera, creando una banda infinita e independiente */}
       <StatsGeneralSection 
         rutas={rutasTotales} 
         totalLocalizaciones={totalLocs} 

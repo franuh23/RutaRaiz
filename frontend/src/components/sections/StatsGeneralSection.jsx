@@ -1,6 +1,7 @@
 import React from 'react';
 import Badge from '../ui/Badge';
 import Container from '../layout/Container';
+// Sección de estadísticas generales.
 
 export default function StatsGeneralSection({ rutas = [], totalLocalizaciones = 0, totalAlojamientos = 0 }) {
 
@@ -10,7 +11,6 @@ export default function StatsGeneralSection({ rutas = [], totalLocalizaciones = 
 
   const kilometrosTotales = Math.round(sumaKilometros);
 
-  // Mapeamos metiendo tus componentes Badge reales en el campo 'valor'
   const metricas = [
     {
       valor: (
@@ -52,12 +52,9 @@ export default function StatsGeneralSection({ rutas = [], totalLocalizaciones = 
                   <span className="fs-3 mb-2" role="img" aria-label={m.label}>
                     {m.icono}
                   </span>
-
-                  {/* Aquí se renderiza dinámicamente tu Badge personalizado */}
                   <div className="mb-2">
                     {m.valor}
                   </div>
-
                   <span
                     className="text-uppercase tracking-wider text-muted mt-1 fw-semibold"
                     style={{ fontSize: '0.72rem', letterSpacing: '0.05em' }}
@@ -65,8 +62,6 @@ export default function StatsGeneralSection({ rutas = [], totalLocalizaciones = 
                     {m.label}
                   </span>
                 </div>
-
-                {/* Separador vertical */}
                 {idx < 2 && (
                   <div className="d-none d-md-block position-absolute top-50 end-0 translate-middle-y bg-body-secondary" style={{ width: '1px', height: '50px' }} />
                 )}

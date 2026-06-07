@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Container from '../components/layout/Container';
 import PlanificacionCard from '../components/planificacion/PlanificacionCard';
 import { apiFetch } from '../services/api';
+// Página del panel personal de rutas, gestiona acciones mediante PlanificacionCard.
 
 export default function MisPlanificacionesPage() {
   const { token, isAuthenticated, loading } = useAuth();
@@ -11,11 +12,7 @@ export default function MisPlanificacionesPage() {
   const [planificaciones, setPlanificaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [activandoId, setActivandoId] = useState(null);
-
-  // 🧭 Buscamos si existe alguna planificación activa en curso (para el banner superior)
   const rutaEnCursoActual = planificaciones.find(p => p.en_curso);
-
-  // 🚀 SEPARACIÓN DE RUTAS POR ESTADO REAL DE NEON
   const rutasPlanificadas = planificaciones.filter(p => p.activo);
   const rutasCompletadas = planificaciones.filter(p => !p.activo);
 
@@ -113,8 +110,6 @@ export default function MisPlanificacionesPage() {
 
   return (
     <Container>
-      
-
       <div className="d-flex justify-content-between align-items-center my-4 flex-wrap gap-3">
         <h1 className="h2 m-0" style={{ color: 'var(--verde-bosque)', fontWeight: '700' }}>
           Mis planificaciones
@@ -128,7 +123,6 @@ export default function MisPlanificacionesPage() {
         </button>
       </div>
 
-      {/* 📊 TARJETAS ESTADÍSTICAS REPARADAS: Solo suman las rutas vivas/planificadas */}
       {planificaciones && planificaciones.length > 0 && (
         <div className="row g-3 mb-5">
           <div className="col-12 col-sm-4">
@@ -173,7 +167,6 @@ export default function MisPlanificacionesPage() {
         </div>
       )}
 
-      {/* 🧭 BANNER DE ACCESO DIRECTO */}
       {rutaEnCursoActual && (
         <div className="alert alert-info border-0 p-3 my-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style={{ backgroundColor: '#e3f2fd', borderRadius: 'var(--radius-md)' }}>
           <div className="d-flex align-items-center gap-2">
@@ -192,7 +185,6 @@ export default function MisPlanificacionesPage() {
         </div>
       )}
 
-      {/* 📂 SECCIÓN 1: ITINERARIOS PLANIFICADOS */}
       <h3 className="h5 fw-bold mb-3 text-muted text-uppercase" style={{ fontSize: '13px', letterSpacing: '0.05em' }}>
         🎒 Próximos Desafíos ({rutasPlanificadas.length})
       </h3>
@@ -216,7 +208,6 @@ export default function MisPlanificacionesPage() {
         </div>
       )}
 
-      {/* 🏆 SECCIÓN 2: HISTORIAL DE ÉXITOS PEREGRINOS (Solo asoma si hay alguna completa) */}
       {rutasCompletadas.length > 0 && (
         <div className="mt-5 mb-5">
           <h3 className="h5 fw-bold mb-3 text-warning text-uppercase" style={{ fontSize: '13px', letterSpacing: '0.05em' }}>
@@ -229,7 +220,7 @@ export default function MisPlanificacionesPage() {
                   p={{ ...p, ruta_nombre: `🎉 ${p.ruta_nombre} (¡Completado!)` }}
                   onVer={(id) => navigate(`/mis-planificaciones/${id}`)}
                   onEliminar={handleEliminar}
-                  onEmpezar={null} // Al pasar null, no saldrá el botón de empezar ruta otra vez
+                  onEmpezar={null}
                 />
               </div>
             ))}

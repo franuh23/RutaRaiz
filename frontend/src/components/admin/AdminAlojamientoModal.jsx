@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
+// Modal para crear o editar alojamientos. Recibe el estado de apertura (isOpen), las localizaciones y los datos a editar (alojamientoEditando).
+// Envía el formulario limpio al componente padre mediante onSave
+
 export default function AdminAlojamientoModal({ isOpen, onClose, onSave, alojamientoEditando, localizaciones }) {
   const [form, setForm] = useState({
     localizacion_id: '',
     nombre: '',
     direccion: '',
-    tipo: 'albergue', // Inicializado con el enum en minúsculas
+    tipo: 'albergue',
     enlace: '',
     telefono: '',
     email: '',
@@ -46,10 +49,9 @@ export default function AdminAlojamientoModal({ isOpen, onClose, onSave, alojami
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Limpiamos los strings vacíos que sean opcionales a null por cortesía con la BD
     const dataToSend = {
       ...form,
-      tipo: form.tipo.toLowerCase(), // Aseguramos minúsculas para Laravel rules
+      tipo: form.tipo.toLowerCase(),
       direccion: form.direccion || null,
       enlace: form.enlace || null,
       telefono: form.telefono || null,

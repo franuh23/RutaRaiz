@@ -1,4 +1,5 @@
 import React from 'react';
+// Muestra la ficha técnica y datos de contacto de un alojamiento.
 
 export default function AlojamientoFicha({ alojamiento }) {
   return (

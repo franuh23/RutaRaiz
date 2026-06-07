@@ -4,13 +4,13 @@ import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 import Container from '../layout/Container';
 import styles from './HeroSection.module.css';
+// Sección de bienvenida (Hero).
 
 export default function HeroSection({ onPlanificar }) {
   const navigate = useNavigate();
 
   return (
     <section className={styles.hero}>
-      {/* Decoración de fondo */}
       <div className={styles.bgDeco} aria-hidden="true" />
 
       <Container>
@@ -44,7 +44,6 @@ export default function HeroSection({ onPlanificar }) {
             </Button>
           </div>
 
-          {/* Stats rápidos */}
           <div className={styles.stats}>
             {[
               { valor: 'Primitivo', label: 'Camino Estrella' },

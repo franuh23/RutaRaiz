@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './FeatureCard.module.css';
+// Tarjeta de características destacadas.
 
 export default function FeatureCard({ feature }) {
   const { icono = '📍', titulo = 'Característica', descripcion = '' } = feature || {};

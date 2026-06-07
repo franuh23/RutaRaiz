@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
+// Gestión perfil de usuario.
 
 export default function PerfilForm({ user, onUpdate }) {
   const [form, setForm] = useState({
@@ -59,7 +60,6 @@ export default function PerfilForm({ user, onUpdate }) {
 
       <form onSubmit={handleSubmit}>
         <div className="row g-3">
-          {/* Selector de Avatar */}
           <div className="col-12 d-flex align-items-center gap-3 mb-2">
             {preview && (
               <img
@@ -147,7 +147,6 @@ export default function PerfilForm({ user, onUpdate }) {
               placeholder="••••••••"
               style={{ borderRadius: 'var(--radius-md)' }}
             />
-            {/* 💡 TEXTO DE INSTRUCCIÓN POLÍTICA DE SEGURIDAD */}
             <div className="form-text text-muted" style={{ fontSize: '0.75rem', lineHeight: '1.2' }}>
               Debe contener al menos 8 caracteres, combinando letras, números y símbolos.
             </div>

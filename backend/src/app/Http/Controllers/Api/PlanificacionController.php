@@ -30,7 +30,7 @@ class PlanificacionController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. 🚀 VALIDACIÓN AVANZADA CONDICIONAL (Modo 3.1 Pro)
+        // Validación según el tipo de planificación
         $request->validate([
             'ruta_id' => 'required|exists:rutas,id',
             'localizacion_inicio_id' => 'required|exists:localizaciones,id',
@@ -41,23 +41,22 @@ class PlanificacionController extends Controller
             'localizacion_fin_id' => 'required_if:tipo_planificacion,destino_dias|nullable|exists:localizaciones,id',
         ]);
 
-        // Cargar la ruta y ordenar sus hitos geográficos por distancia real
+        // Cargar la ruta y ordenar sus localizaciones por distancia real
         $ruta = Ruta::with('localizaciones')->findOrFail($request->ruta_id);
         $localizaciones = $ruta->localizaciones->sortBy('distancia_desde_inicio')->values();
-
         $inicioId = $request->localizacion_inicio_id;
         $finId = $request->localizacion_fin_id;
         $tipo = $request->tipo_planificacion;
 
-        // Buscar el índice físico de salida
+        // Buscar el índice de inicio
         $indiceInicio = $localizaciones->search(fn($loc) => $loc->id == $inicioId);
         if ($indiceInicio === false) {
             return response()->json(['error' => 'Localizaciones no válidas'], 422);
         }
 
-        // 🛠️ REPARADO: Control de fin si viene vacío ("Hasta el final del camino") o según el modo
+        // Determinar el índice de fin según el tipo de planificación
         if ($tipo === 'dias_ritmo' || (empty($finId) && $tipo === 'destino_ritmo')) {
-            $indiceFin = $localizaciones->count() - 1; // Último hito de la ruta por defecto
+            $indiceFin = $localizaciones->count() - 1;
         } else {
             $indiceFin = $localizaciones->search(fn($loc) => $loc->id == $finId);
             if ($indiceFin === false || $indiceInicio >= $indiceFin) {
@@ -65,7 +64,7 @@ class PlanificacionController extends Controller
             }
         }
 
-        // 2. 🧮 PRE-CÁLCULO INICIAL DE VARIABLES
+        // Calcular variables según el tipo de planificación
         $kmDia = $request->km_dia;
         $diasMaximos = $request->dias_disponibles;
 
@@ -74,7 +73,7 @@ class PlanificacionController extends Controller
             $kmDia = $diasMaximos > 0 ? round($distanciaTotalTramo / $diasMaximos, 2) : 20;
         }
 
-        // 3. 🌀 BUCLE REPARADO: GENERADOR DE ETAPAS CON REPARTO EQUITATIVO DINÁMICO
+        // Generar etapas
         $etapasCalculadas = [];
         $dia = 1;
         $i = $indiceInicio;
@@ -82,7 +81,7 @@ class PlanificacionController extends Controller
 
         while ($i < $indiceFin) {
 
-            // 🛑 FRENO DE MANO DE JORNADAS (Modo días_ritmo)
+            // Límite de días en modo días_ritmo o destino_dias
             if (($tipo === 'dias_ritmo' || $tipo === 'destino_dias') && $dia > $diasMaximos) {
                 $indiceDetencionReal = $i;
                 break;
@@ -92,19 +91,17 @@ class PlanificacionController extends Controller
             $mejorDestinoIndice = $i + 1;
             $menorDiferencia = null;
 
-            // 🚀 RECALCULO DE OBJETIVO DÍA A DÍA (Evita la etapa final destructiva de 67 km)
+            // Recalcular km_día en modo destino_dias para distribuir equitativamente
             if ($tipo === 'destino_dias') {
                 $distanciaRestante = $localizaciones[$indiceFin]->distancia_desde_inicio - $inicioEtapa->distancia_desde_inicio;
                 $diasRestantes = ($diasMaximos - $dia) + 1;
                 $kmDia = $diasRestantes > 0 ? ($distanciaRestante / $diasRestantes) : $distanciaRestante;
             }
 
-            // Buscar cuál de las siguientes paradas se ajusta mejor al objetivo actual recalculado
+            // Buscar la mejor localización para finalizar la etapa
             for ($j = $i + 1; $j <= $indiceFin; $j++) {
                 $distanciaTotalEtapa = $localizaciones[$j]->distancia_desde_inicio - $inicioEtapa->distancia_desde_inicio;
                 $diferencia = abs($distanciaTotalEtapa - $kmDia);
-
-                // Si es el último día de un Reto Crono, dejamos un margen amplio para cerrar en el destino real
                 $limiteMaximoPasarse = ($tipo === 'destino_dias' && $dia == $diasMaximos) ? $kmDia + 30 : $kmDia + 6;
 
                 if ($menorDiferencia === null || $diferencia < $menorDiferencia) {
@@ -132,7 +129,7 @@ class PlanificacionController extends Controller
             $i = $mejorDestinoIndice;
         }
 
-        // 4. 💾 PERSISTENCIA CON RE-AJUSTE AUTOMÁTICO DE METAS
+        // Guardar la planificación
         $finalRealId = ($tipo === 'dias_ritmo') ? $localizaciones[$indiceDetencionReal]->id : $localizaciones[$indiceFin]->id;
 
         $planificacion = Planificacion::create([
@@ -146,7 +143,7 @@ class PlanificacionController extends Controller
             'activo' => true,
         ]);
 
-        // Guardar físicamente las etapas calculadas en la tabla 'etapas'
+        // Guardar las etapas
         foreach ($etapasCalculadas as $etapa) {
             $planificacion->etapas()->create($etapa);
         }
@@ -171,6 +168,7 @@ class PlanificacionController extends Controller
             ->where('usuario_id', Auth::id())
             ->findOrFail($id);
 
+        // Formatear etapas manualmente
         $etapasFormateadas = $planificacion->etapas->map(function ($etapa) {
             return [
                 'id' => $etapa->id,
@@ -208,6 +206,7 @@ class PlanificacionController extends Controller
             'is_public' => 'required|boolean'
         ]);
 
+        // No permitir publicar planificaciones clonadas
         if ($request->is_public && $planificacion->original_id !== null) {
             return response()->json([
                 'status' => 'error',
@@ -241,6 +240,9 @@ class PlanificacionController extends Controller
         ], 200);
     }
 
+    /**
+     * Export planification as PDF.
+     */
     public function exportarPdf(string $id)
     {
         $planificacion = Planificacion::with(['ruta', 'etapas.localizacionInicio', 'etapas.localizacionFin', 'usuario'])
@@ -261,6 +263,9 @@ class PlanificacionController extends Controller
         return $pdf->download($nombreArchivo);
     }
 
+    /**
+     * Export planification as Excel.
+     */
     public function exportarExcel(string $id)
     {
         $planificacion = Planificacion::where('usuario_id', Auth::id())->findOrFail($id);
@@ -269,11 +274,12 @@ class PlanificacionController extends Controller
     }
 
     /**
-     * INICIAR SEGUIMIENTO DE RUTA
+     * Start route tracking.
      */
     public function empezarRuta(string $id)
     {
         $usuarioId = Auth::id();
+        // Desactivar cualquier otra ruta en curso
         Planificacion::where('usuario_id', $usuarioId)->update(['en_curso' => false]);
 
         $planificacion = Planificacion::where('usuario_id', $usuarioId)->findOrFail($id);
@@ -286,7 +292,7 @@ class PlanificacionController extends Controller
     }
 
     /**
-     * 🚀 DETENER SEGUIMIENTO DE RUTA
+     * Stop route tracking.
      */
     public function pararRuta(string $id)
     {
@@ -300,7 +306,7 @@ class PlanificacionController extends Controller
     }
 
     /**
-     * MARCAR / DESMARCAR ETAPA (Toggle Progreso)
+     * Toggle stage completion status.
      */
     public function toggleEtapa(string $planificacionId, string $etapaId)
     {
@@ -319,7 +325,7 @@ class PlanificacionController extends Controller
     }
 
     /**
-     * 🏁 FINALIZAR Y ARCHIVAR RUTA AL 100%
+     * Complete and archive the route.
      */
     public function finalizarRuta(string $id)
     {

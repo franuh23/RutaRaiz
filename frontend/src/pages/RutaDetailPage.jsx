@@ -4,6 +4,7 @@ import Container from '../components/layout/Container';
 import LocalizacionCard from '../components/ui/LocalizacionCard';
 import styles from './RutaDetailPage.module.css';
 import { apiFetch } from '../services/api';
+// Carga los detalles y la ficha técnica de una ruta específica.
 
 export default function RutaDetailPage() {
   const { id } = useParams();
@@ -47,7 +48,6 @@ export default function RutaDetailPage() {
 
   return (
     <Container className="py-4">
-      {/* Botón de retorno rápido */}
       <button 
         className="btn btn-sm btn-link text-decoration-none text-muted p-0 mb-3"
         onClick={() => navigate('/rutas')}
@@ -55,21 +55,17 @@ export default function RutaDetailPage() {
         ← Volver a todas las rutas
       </button>
 
-      {/* Título de la Ruta */}
       <h1 className="fw-bold mb-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--verde-bosque)' }}>
         {ruta.nombre}
       </h1>
 
-      {/* Imagen destacada utilizando un contenedor redondeado de Bootstrap */}
       {ruta.imagen && (
         <div className="mb-4 overflow-hidden rounded-4 shadow-sm">
           <img src={ruta.imagen} alt={ruta.nombre} className={`${styles.imagen} w-100`} style={{ objectFit: 'cover', maxHeight: '350px' }} />
         </div>
       )}
 
-      {/* Ficha técnica de la ruta */}
       <div className="p-3 rounded-4 mb-4" style={{ backgroundColor: 'var(--crema-oscura)' }}>
-        {/* Rejilla de Bootstrap flexible: 1 columna en móvil, 3 en pantallas grandes */}
         <div className="row g-2 text-center mb-3">
           <div className="col-12 col-md-4">
             <div className="bg-white p-2 rounded-3 shadow-sm small fw-semibold text-secondary">
@@ -93,7 +89,6 @@ export default function RutaDetailPage() {
         </p>
       </div>
 
-      {/* Bloque desplegable de Localizaciones (Acordeones) */}
       <div className="mt-4">
         <h3 className="fw-bold mb-3" style={{ fontFamily: 'var(--font-display)', color: 'var(--verde-hoja)', fontSize: '1.3rem' }}>
           📌 Localizaciones y alojamientos del recorrido

@@ -1,4 +1,6 @@
 import React from 'react';
+// Representa una fila individual en la tabla de administración de puntos de paso.
+// Muestra la información de un hito (loc) y despacha sus acciones de edición o borrado al componente padre mediante onEditar y onEliminar.
 
 export default function AdminLocalizacionRow({ loc, onEditar, onEliminar }) {
   return (

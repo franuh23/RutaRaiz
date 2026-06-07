@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import AdminLocalizacionRow from './AdminLocalizacionRow';
+// Acordeón de administración que agrupa, filtra y ordena las localizaciones por distancia según su ruta_id.
+// Controla la apertura de las secciones mediante estado local y delega las acciones de cada fila a AdminLocalizacionRow.
 
 export default function AdminLocalizacionesAccordion({ rutas, localizaciones, onEditar, onEliminar }) {
   const [rutaAbierta, setRutaAbierta] = useState(null);
@@ -11,7 +13,6 @@ export default function AdminLocalizacionesAccordion({ rutas, localizaciones, on
   return (
     <div className="accordion d-flex flex-column gap-3">
       {rutas.map((ruta) => {
-        // Filtrar las localizaciones que pertenecen a esta ruta concreta
         const locsDeEstaRuta = localizaciones.filter(loc => loc.ruta_id === ruta.id)
           .sort((a, b) => a.distancia_desde_inicio - b.distancia_desde_inicio);
         

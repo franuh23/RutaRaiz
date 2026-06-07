@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+// Barra de navegación global.
+// Renderiza los enlaces y el perfil del usuario dinámicamente según su estado (isAuthenticated) y rol usando useAuth y useNavigate.
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,13 +14,11 @@ export default function Navbar() {
     navigate('/');
   };
 
-  // Generamos el avatar por defecto con las iniciales si el usuario no tiene foto subida
   const avatarPorDefecto = `https://api.dicebear.com/7.x/initials/svg?seed=${user?.nick || 'Peregrino'}&backgroundType=gradientLinear&backgroundColor=4e6e58,2d4a34`;
 
   return (
     <header className="navbar navbar-expand-md navbar-light bg-white sticky-top shadow-sm py-3">
       <div className="container">
-        {/* Logo - solo imagen + texto */}
         <Link to="/" className="navbar-brand d-flex align-items-center gap-2">
           <img src="/logoRutaRaiz.png" alt="RutaRaíz" height="40" />
           <span className="fw-bold text-dark fs-4">
@@ -26,7 +26,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Botón hamburguesa para móviles */}
         <button
           className="navbar-toggler"
           type="button"
@@ -35,7 +34,6 @@ export default function Navbar() {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* Menú colapsable */}
         <div className={`collapse navbar-collapse ${menuOpen ? 'show' : ''}`}>
           <ul className="navbar-nav ms-auto mb-2 mb-md-0 gap-3">
             <li className="nav-item">
@@ -49,7 +47,7 @@ export default function Navbar() {
                 <Link to="/mis-planificaciones" className="nav-link">Mis Planificaciones</Link>
               </li>
             )}
-            {/* Pestaña comunidad */}
+
             {isAuthenticated && (
               <li className="nav-item">
                 <Link to="/comunidad" className="nav-link" style={{ fontWeight: '600' }}>Comunidad</Link>
@@ -62,11 +60,9 @@ export default function Navbar() {
             )}
           </ul>
 
-          {/* Acciones de usuario a la derecha */}
           <div className="d-flex align-items-center gap-3 ms-md-3 mt-3 mt-md-0">
             {isAuthenticated ? (
               <>
-                {/* Enlace al perfil con la foto redonda y el Nick, sin el rol */}
                 <Link to="/perfil" className="text-dark text-decoration-none d-flex align-items-center gap-2 fw-semibold">
                   <img 
                     src={user?.avatar_url || avatarPorDefecto} 

@@ -8,6 +8,11 @@ class PlanificacionLike extends Model
 {
     protected $table = 'planificacion_likes';
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'usuario_id',
         'planificacion_id',

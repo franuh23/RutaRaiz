@@ -6,6 +6,7 @@ import Button from '../components/ui/Button';
 import TarjetaClima from '../components/seguimiento/TarjetaClima';
 import LineaProgreso from '../components/seguimiento/LineaProgreso';
 import { apiFetch } from '../services/api';
+// Gestiona el progreso en tiempo real de la ruta activa.
 
 export default function SeguimientoPage() {
     const { token, loading } = useAuth();
@@ -21,7 +22,6 @@ export default function SeguimientoPage() {
             return;
         }
 
-        // 🚀 SIMPLIFICADO: Buscamos directamente las planificaciones para pescar la activa
         apiFetch('/api/planificaciones', {
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -34,7 +34,6 @@ export default function SeguimientoPage() {
                 const activa = lista.find(p => p.en_curso);
 
                 if (activa) {
-                    // Cargamos el detalle completo con el ordenamiento SQL reparado del show
                     apiFetch(`/api/planificaciones/${activa.id}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -57,7 +56,6 @@ export default function SeguimientoPage() {
             });
     }, [token, loading, navigate]);
 
-    // Función interactiva para marcar/desmarcar los checks de los días
     const handleToggleEtapa = async (etapaId) => {
         if (!rutaActiva) return;
         try {
@@ -71,7 +69,6 @@ export default function SeguimientoPage() {
             const data = await response.json();
 
             if (response.ok) {
-                // Modificamos el estado manteniendo estrictamente la inmutabilidad para que no salten de posición
                 setRutaActiva(prev => ({
                     ...prev,
                     etapas: prev.etapas.map(e => e.id === etapaId ? { ...e, completada: !!data.completada } : e)
@@ -82,7 +79,6 @@ export default function SeguimientoPage() {
         }
     };
 
-    // 🚀 NUEVA FUNCIÓN: Detener el camino por completo
     const handlePararRuta = async () => {
         if (!rutaActiva || !window.confirm('¿Seguro que deseas detener el seguimiento de esta ruta? Puedes reanudarla cuando quieras.')) return;
         setParando(true);
@@ -95,7 +91,7 @@ export default function SeguimientoPage() {
                 }
             });
             if (response.ok) {
-                setRutaActiva(null); // Reseteamos la pantalla al muro de contingencia
+                setRutaActiva(null);
             }
         } catch (err) {
             console.error("Error al parar la ruta:", err);
@@ -104,7 +100,6 @@ export default function SeguimientoPage() {
         }
     };
 
-    // Nueva función para el fin del camino
     const handleFinalizarRuta = async () => {
         if (!window.confirm('🎉 ¡Felicidades! ¿Deseas dar por concluido este viaje y guardarlo en tu historial de éxitos?')) return;
         setParando(true);
@@ -156,8 +151,6 @@ export default function SeguimientoPage() {
     const etapasTotales = rutaActiva.etapas?.length || 0;
     const etapasCompletadas = rutaActiva.etapas?.filter(e => e.completada).length || 0;
     const porcentajeProgreso = etapasTotales > 0 ? Math.round((etapasCompletadas / etapasTotales) * 100) : 0;
-
-    // Buscamos cuál es la primera etapa vacía para pintarle el clima en la meta
     const etapaActualClima = rutaActiva.etapas?.find(e => !e.completada) || rutaActiva.etapas?.[etapasTotales - 1];
     const puebloClima = etapaActualClima ? etapaActualClima.fin : null;
 
@@ -171,7 +164,6 @@ export default function SeguimientoPage() {
                     </h1>
                 </div>
                 
-                {/* 🚀 BOTÓN DINÁMICO INTELIGENTE */}
                 {porcentajeProgreso === 100 ? (
                     <Button 
                         variant="primary" 
@@ -195,7 +187,6 @@ export default function SeguimientoPage() {
                 )}
             </div>
 
-            {/* 📊 SECCIÓN DE MÉTRICAS GENERALES */}
             <div className="card border-0 shadow-sm p-4 bg-white mb-4" style={{ borderRadius: 'var(--radius-lg)' }}>
                 <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap">
                     <span className="fw-bold text-muted small">PROGRESO DEL CAMINO</span>

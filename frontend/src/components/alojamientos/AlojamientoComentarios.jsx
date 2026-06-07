@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+// Gestiona los comentarios de un alojamiento.
 
 export default function AlojamientoComentarios({ 
   comentarios = [], 
   onEnviarComentario, 
-  onBorrarComentario, // 👈 Nueva prop para manejar la acción de borrar
-  currentUser // 👈 Nueva prop para saber quién está logueado (pasa su ID y Rol)
+  onBorrarComentario,
+  currentUser
 }) {
   const [nuevoComentario, setNuevoComentario] = useState('');
 
@@ -26,7 +27,6 @@ export default function AlojamientoComentarios({
       ) : (
         <div className="d-flex flex-column gap-3 mb-4">
           {comentarios.map((c) => {
-            // 🛡️ Comprobación de seguridad visual: ¿Es el autor o es administrador global?
             const esAutor = currentUser && Number(c.usuario_id) === Number(currentUser.id);
             const esAdmin = currentUser?.rol === 'admin';
             const puedeBorrar = esAutor || esAdmin;
@@ -38,7 +38,6 @@ export default function AlojamientoComentarios({
                   <div className="d-flex align-items-center gap-2">
                     <span>{c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</span>
                     
-                    {/* 🗑️ Botón Papelera Condicional */}
                     {puedeBorrar && (
                       <button
                         className="btn btn-sm text-danger p-0 border-0 bg-transparent ms-2"

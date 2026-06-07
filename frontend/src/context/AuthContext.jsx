@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { apiFetch } from '../services/api'; // 👈 AÑADIDO
+import { apiFetch } from '../services/api';
+// Proveedor de autenticación, valida sesiones con apiFetch.
 
 const AuthContext = createContext(null);
 
@@ -22,7 +23,7 @@ export const AuthProvider = ({ children }) => {
         const comprobarSesion = async () => {
             if (token) {
                 try {
-                    const response = await apiFetch('/api/usuario', { // 👈 CAMBIADO
+                    const response = await apiFetch('/api/usuario', {
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             'Accept': 'application/json'
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        const response = await apiFetch('/api/login', { // 👈 CAMBIADO
+        const response = await apiFetch('/api/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -72,7 +73,7 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         if (token) {
             try {
-                await apiFetch('/api/logout', { // 👈 CAMBIADO
+                await apiFetch('/api/logout', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,

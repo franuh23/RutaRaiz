@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+// Formulario de login. Consume el contexto useAuth para autenticar al usuario y redirige al inicio mediante useNavigate.
 
 export default function LoginForm() {
   const { login } = useAuth();

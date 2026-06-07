@@ -11,14 +11,11 @@ export default function TarjetaClima({ pueblo }) {
     }
 
     setCargando(true);
-    // 1. Buscamos latitud y longitud del hito geográfico
     fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(pueblo)}&count=1&language=es`)
       .then(res => res.json())
       .then(geoData => {
         const resultado = geoData.results?.[0];
         if (!resultado) throw new Error('Pueblo no localizado');
-
-        // 2. Conectamos con el satélite meteorológico usando las coordenadas exactas
         return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${resultado.latitude}&longitude=${resultado.longitude}&current_weather=true&timezone=auto`);
       })
       .then(res => res.json())
@@ -34,7 +31,6 @@ export default function TarjetaClima({ pueblo }) {
       });
   }, [pueblo]);
 
-  // Traductor rápido de códigos meteorológicos WMO estándares a iconos comprensibles
   const obtenerEstadoCielo = (code) => {
     if (code === 0) return { texto: 'Despejado', icono: 'fa-sun text-warning' };
     if ([1, 2, 3].includes(code)) return { texto: 'Intervalos nubosos', icono: 'fa-cloud-sun text-secondary' };
@@ -68,7 +64,7 @@ export default function TarjetaClima({ pueblo }) {
     <div className="card border-0 shadow-sm p-4 bg-white text-dark text-center" style={{ borderRadius: 'var(--radius-lg)' }}>
       <span className="fw-bold text-muted small text-uppercase mb-1" style={{ fontSize: '11px' }}>Próxima estación</span>
       <h4 className="fw-bold mb-3" style={{ color: 'var(--verde-bosque)' }}>{pueblo}</h4>
-      
+
       <div className="d-flex align-items-center justify-content-center gap-3 my-2">
         <i className={`fa-solid ${estado.icono}`} style={{ fontSize: '38px' }}></i>
         <span className="fs-1 fw-extrabold m-0 text-dark">{Math.round(clima.temperature)}°C</span>
@@ -79,8 +75,8 @@ export default function TarjetaClima({ pueblo }) {
       </span>
 
       <p className="text-muted small mt-3 mb-0 pt-2 border-top">
-        {[51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(clima.weathercode) 
-          ? '🌧️ El tramo reporta agua. Ajusta bien las fundas de la mochila.' 
+        {[51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(clima.weathercode)
+          ? '🌧️ El tramo reporta agua. Ajusta bien las fundas de la mochila.'
           : '🥾 Tiempo estable para la marcha. ¡Buen camino, peregrino!'}
       </p>
     </div>

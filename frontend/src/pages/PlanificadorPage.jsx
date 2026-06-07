@@ -5,6 +5,7 @@ import Container from '../components/layout/Container';
 import FormularioPlanificador from '../components/planificacion/FormularioPlanificador';
 import ResultadoPlanificador from '../components/planificacion/ResultadoPlanificador';
 import { apiFetch } from '../services/api';
+// Orquesta los parámetros de marcha con FormularioPlanificador y ResultadoPlanificador.
 
 export default function PlanificadorPage() {
   const { token, isAuthenticated } = useAuth();
@@ -15,11 +16,8 @@ export default function PlanificadorPage() {
   const [error, setError] = useState('');
   const [mensajeGuardado, setMensajeGuardado] = useState('');
   const [localizaciones, setLocalizaciones] = useState([]);
-
-  // --- PERSISTENCIA MODO 3.1 PRO ---
   const [tipoPlanificacion, setTipoPlanificacion] = useState(() => localStorage.getItem('rr_tipoPlanificacion') || 'destino_ritmo');
   const [diasDisponibles, setDiasDisponibles] = useState(() => Number(localStorage.getItem('rr_diasDisponibles')) || 10);
-
   const [selectedRuta, setSelectedRuta] = useState(() => localStorage.getItem('rr_selectedRuta') || '');
   const [inicioId, setInicioId] = useState(() => localStorage.getItem('rr_inicioId') || '');
   const [finId, setFinId] = useState(() => localStorage.getItem('rr_finId') || '');
@@ -30,7 +28,6 @@ export default function PlanificadorPage() {
     return saved && saved !== "undefined" ? JSON.parse(saved) : null;
   });
 
-  // Sincronizar todos los cambios en localStorage
   useEffect(() => {
     localStorage.setItem('rr_tipoPlanificacion', tipoPlanificacion);
     localStorage.setItem('rr_diasDisponibles', diasDisponibles.toString());
@@ -46,7 +43,6 @@ export default function PlanificadorPage() {
     }
   }, [tipoPlanificacion, diasDisponibles, selectedRuta, inicioId, finId, kmDia, fechaInicio, etapas]);
 
-  // Cargar lista de rutas inicial
   useEffect(() => {
     apiFetch('/api/rutas')
       .then(res => res.json())
@@ -82,7 +78,6 @@ export default function PlanificadorPage() {
     }
   };
 
-  // 🌀 SIMULACIÓN DE PREVISIÓN DE ETAPAS (Adaptado a las variantes de cálculo)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -90,14 +85,12 @@ export default function PlanificadorPage() {
     setEtapas(null);
     setMensajeGuardado('');
     try {
-      // Configuramos las variables URL en base al tipo seleccionado
       let queryParams = `ruta_id=${selectedRuta}&localizacion_inicio_id=${inicioId}&tipo_planificacion=${tipoPlanificacion}`;
       
       if (tipoPlanificacion !== 'destino_dias') queryParams += `&km_dia=${kmDia}`;
       if (tipoPlanificacion !== 'dias_ritmo' && finId) queryParams += `&localizacion_fin_id=${finId}`;
       if (tipoPlanificacion !== 'destino_ritmo') queryParams += `&dias_disponibles=${diasDisponibles}`;
 
-      // Reutiliza la lógica de previsualización pasando los nuevos flags
       const response = await apiFetch(`/api/rutas/planificar?${queryParams}`);
       const data = await response.json();
       if (response.ok) {
@@ -112,7 +105,6 @@ export default function PlanificadorPage() {
     }
   };
 
-  // 💾 PERSISTENCIA FINAL DE LA PLANIFICACIÓN EN NEON
   const handleGuardar = async () => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -124,11 +116,9 @@ export default function PlanificadorPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-
     setGuardando(true);
     setError('');
 
-    // Ajustamos dinámicamente el payload JSON según las reglas que espera Laravel
     const payload = {
       ruta_id: selectedRuta,
       localizacion_inicio_id: inicioId,
@@ -217,7 +207,6 @@ export default function PlanificadorPage() {
           setFechaInicio={setFechaInicio}
           onSubmit={handleSubmit}
           loading={loading}
-          // Inyección de estados Pro
           tipoPlanificacion={tipoPlanificacion}
           setTipoPlanificacion={setTipoPlanificacion}
           diasDisponibles={diasDisponibles}
@@ -245,7 +234,6 @@ export default function PlanificadorPage() {
         </div>
       )}
 
-      {/* Minitutorial de bienvenida */}
       {!etapas && !loading && (
         <div className="card shadow-sm border-0 p-4 mb-5 bg-white text-center" style={{ borderRadius: 'var(--radius-lg)' }}>
           <div className="py-3">

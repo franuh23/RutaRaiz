@@ -1,12 +1,11 @@
 import React from 'react';
+// Fila de la tabla de usuarios.
+// Muestra el perfil de un usuario (nick, rol, estado) y gestiona los cambios dinámicos a través de los callbacks onCambiarRol, onToggleActivo y onEliminar.
 
 export default function AdminUsuarioRow({ usuario, onCambiarRol, onToggleActivo, onEliminar }) {
   return (
     <tr className={!usuario.activo ? 'table-danger-subtle text-muted' : ''}>
-      {/* ID */}
       <td className="fw-bold align-middle ps-3">#{usuario.id}</td>
-      
-      {/* Avatar + Nick */}
       <td className="align-middle fw-bold">
         <div className="d-flex align-items-center gap-2">
           <div 
@@ -23,16 +22,12 @@ export default function AdminUsuarioRow({ usuario, onCambiarRol, onToggleActivo,
         </div>
       </td>
 
-      {/* Nombre y Apellidos */}
       <td className="align-middle">
         <div className="fw-semibold text-dark">{usuario.nombre}</div>
         <div className="text-muted small">{usuario.apellidos}</div>
       </td>
 
-      {/* Email */}
       <td className="align-middle small font-monospace">{usuario.email}</td>
-
-      {/* Rol Selector */}
       <td className="align-middle">
         <select 
           className="form-select form-select-sm fw-bold border-0 bg-light" 
@@ -45,7 +40,6 @@ export default function AdminUsuarioRow({ usuario, onCambiarRol, onToggleActivo,
         </select>
       </td>
 
-      {/* Estado Activo (Interruptor Rápido) */}
       <td className="align-middle">
         <button 
           className={`btn btn-sm fw-bold px-3 py-1 ${usuario.activo ? 'btn-light text-success border-success-subtle' : 'btn-danger'}`}
@@ -56,7 +50,6 @@ export default function AdminUsuarioRow({ usuario, onCambiarRol, onToggleActivo,
         </button>
       </td>
 
-      {/* Acciones (Borrado total) */}
       <td className="align-middle text-end pe-3">
         <button 
           className="btn btn-sm btn-outline-danger fw-semibold px-2" 

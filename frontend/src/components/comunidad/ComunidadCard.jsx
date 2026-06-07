@@ -39,7 +39,6 @@ const HeartLikeButton = ({ count, isActive, onClick }) => {
 };
 
 export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuarioLogueadoId }) {
-  // ⚡ Estado local para controlar si se ven las etapas detalladas de esta tarjeta
   const [showEtapas, setShowEtapas] = useState(false);
 
   const {
@@ -52,7 +51,7 @@ export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuario
     dias_totales = 1,
     likes_count = 0,
     ha_dado_like = false,
-    etapas = [] // Recibimos las etapas que acabamos de añadir en Laravel
+    etapas = []
   } = p;
 
   const esMia = usuario_id === usuarioLogueadoId;
@@ -68,7 +67,6 @@ export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuario
     <div className="card shadow-sm border-0 p-4 mb-3 bg-white" style={{ borderRadius: 'var(--radius-lg)' }}>
       <div className="row align-items-center g-3">
         {/* Info de la ruta */}
-        {/* Info de la ruta */}
         <div className="col-12 col-md-8">
           <div className="d-flex align-items-center gap-2 mb-2">
             <h3 className="h5 mb-0" style={{ color: 'var(--verde-bosque)', fontWeight: '700' }}>
@@ -83,7 +81,6 @@ export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuario
             <Badge variant="difficulty-medium" size="sm">🗓️ {dias_totales} {dias_totales === 1 ? 'día' : 'días'}</Badge>
             <span className="text-muted small ps-1">📅 Salida: {formatearFecha(fecha_inicio)}</span>
             
-            {/* 🚀 EL NUEVO BOTÓN: Estilizado, moderno, con icono y alineado de categoría */}
             <button 
               className="btn btn-sm px-3 py-1 ms-md-2 d-flex align-items-center gap-2"
               style={{ 
@@ -103,7 +100,7 @@ export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuario
           </div>
         </div>
 
-        {/* Acciones de comunidad (Likes y Clonar) */}
+        {/* Likes y Clonar */}
         <div className="col-12 col-md-4 d-flex justify-content-md-end align-items-center gap-3">
           <HeartLikeButton 
             count={likes_count}
@@ -153,7 +150,7 @@ export default function ComunidadCard({ p, onLike, onClonar, clonandoId, usuario
         </div>
       </div>
 
-      {/* 🧭 LISTADO DE ETAPAS DESPLEGABLE */}
+      {/* LISTADO DE ETAPAS */}
       {showEtapas && (
         <div className="mt-4 pt-3 border-top animate__animated animate__fadeIn">
           <h5 className="h6 fw-bold text-muted text-uppercase mb-3" style={{ fontSize: '11px', letterSpacing: '0.05em' }}>

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Badge from './Badge';
 import styles from './RouteCardSimple.module.css';
+// Variante simplificada de tarjeta de ruta.
 
 const DIFFICULTY_VARIANT = {
   baja: 'difficulty-easy',

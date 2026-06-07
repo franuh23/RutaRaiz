@@ -4,10 +4,9 @@ import Container from '../components/layout/Container';
 import PerfilInfo from '../components/profile/PerfilInfo';
 import PerfilForm from '../components/profile/PerfilForm';
 import { apiFetch } from '../services/api';
+// Página de gestión del perfil de usuario, sincroniza el estado global usando setUser.
 
 export default function PerfilPage() {
-  // Extraemos 'setUser' de tu contexto para poder actualizar la memoria de React al instante
-  // Si tu contexto usa otro nombre (como 'updateUser'), cambia 'setUser' por ese nombre
   const { user, token, setUser } = useAuth(); 
   const [feedback, setFeedback] = useState({ status: '', msg: '' });
 
@@ -48,14 +47,8 @@ export default function PerfilPage() {
 
       if (res.ok) {
         setFeedback({ status: 'success', msg: '¡Perfil y avatar actualizados correctamente!' });
-        
-        // 🔥 LA MAGIA ESTÁ AQUÍ:
-        // Si tu AuthContext expone 'setUser', actualizamos el estado global con los datos frescos que devuelve Laravel
         if (setUser && data.user) {
           setUser(data.user);
-          
-          // Opcional: Si guardas el usuario en el localStorage dentro del AuthContext para que no se pierda al recargar,
-          // lo actualizamos también aquí para que al salir y volver persistan los datos nuevos
           localStorage.setItem('user', JSON.stringify(data.user));
         }
       } else {

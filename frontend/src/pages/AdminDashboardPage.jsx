@@ -9,6 +9,7 @@ import AdminLocalizacionesAccordion from '../components/admin/AdminLocalizacione
 import AdminAlojamientosAccordion from '../components/admin/AdminAlojamientosAccordion';
 import AdminUsuarioRow from '../components/admin/AdminUsuarioRow';
 import { apiFetch } from '../services/api';
+// Panel central de administración, sincroniza la BD mediante Promise.all y apiFetch.
 
 export default function AdminDashboardPage() {
   const { token } = useAuth();
@@ -16,10 +17,8 @@ export default function AdminDashboardPage() {
   const [rutas, setRutas] = useState([]);
   const [localizaciones, setLocalizaciones] = useState([]);
   const [alojamientos, setAlojamientos] = useState([]);
-  const [usuarios, setUsuarios] = useState([]); // 👈 Estado para los usuarios
+  const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Modales Control Estado
   const [isRutaModalOpen, setIsRutaModalOpen] = useState(false);
   const [rutaEditando, setRutaEditando] = useState(null);
   const [isLocModalOpen, setIsLocModalOpen] = useState(false);
@@ -38,7 +37,7 @@ export default function AdminDashboardPage() {
         setRutas(rutasData.data || []);
         setLocalizaciones(locData.data || []);
         setAlojamientos(alojData.data || []);
-        setUsuarios(usuariosData.data || []); // Guardamos usuarios
+        setUsuarios(usuariosData.data || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -48,7 +47,6 @@ export default function AdminDashboardPage() {
     if (token) cargarDatos();
   }, [token]);
 
-  // Funciones de actualización de Usuarios
   const handleCambiarRolUsuario = async (id, nuevoRol) => {
     try {
       const res = await apiFetch(`/api/usuarios/${id}`, {
@@ -82,7 +80,6 @@ export default function AdminDashboardPage() {
     } catch (err) { console.error(err); }
   };
 
-  // Resto de funciones originales (Borrado/Guardado de Rutas, Locs y Alojs)
   const handleEliminarRuta = async (id) => {
     if (!confirm('¿Seguro que deseas eliminar esta ruta de forma permanente?')) return;
     try {
@@ -171,7 +168,6 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Tabs Selector Selector de pestañas */}
       <ul className="nav nav-tabs mb-4 border-0 bg-light p-2 rounded">
         <li className="nav-item">
           <button className={`nav-link border-0 fw-bold px-4 py-2 ${activeTab === 'rutas' ? 'bg-white text-dark shadow-sm' : 'text-secondary'}`} onClick={() => setActiveTab('rutas')}>🗺️ Rutas ({rutas.length})</button>
@@ -182,13 +178,11 @@ export default function AdminDashboardPage() {
         <li className="nav-item">
           <button className={`nav-link border-0 fw-bold px-4 py-2 ${activeTab === 'alojamientos' ? 'bg-white text-dark shadow-sm' : 'text-secondary'}`} onClick={() => setActiveTab('alojamientos')}>🏠 Alojamientos ({alojamientos.length})</button>
         </li>
-        {/* 🔄 NUEVO: Pestaña de usuarios añadida */}
         <li className="nav-item">
           <button className={`nav-link border-0 fw-bold px-4 py-2 ${activeTab === 'usuarios' ? 'bg-white text-dark shadow-sm' : 'text-secondary'}`} onClick={() => setActiveTab('usuarios')}>👥 Usuarios ({usuarios.length})</button>
         </li>
       </ul>
 
-      {/* Cuerpo de las pestañas */}
       <div className="mb-5">
         {activeTab === 'rutas' && (
           <div className="card border-0 shadow-sm p-4 bg-white" style={{ borderRadius: 'var(--radius-lg)' }}>
@@ -215,7 +209,6 @@ export default function AdminDashboardPage() {
           <AdminAlojamientosAccordion rutas={rutas} localizaciones={localizaciones} alojamientos={alojamientos} onEditar={(a) => { setAlojamientoEditando(a); setIsAlojModalOpen(true); }} onEliminar={handleEliminarAloj} />
         )}
 
-        {/* 🔄 NUEVO: Tabla de Gestión de Usuarios */}
         {activeTab === 'usuarios' && (
           <div className="card border-0 shadow-sm p-4 bg-white" style={{ borderRadius: 'var(--radius-lg)' }}>
             <div className="table-responsive">

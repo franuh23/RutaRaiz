@@ -2,6 +2,7 @@ import React from 'react';
 import EtapaCard from './EtapaCard';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
+// Muestra los resultados del itinerario calculado.
 
 export default function ResultadoPlanificador({
   etapas,

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+// Protege rutas privadas. Valida con useAuth si el usuario está autenticado y posee el rol adecuado (allowedRoles), redirigiendo si no cumple los requisitos.
 
 export default function ProtectedRoute({ children, allowedRoles }) {
   const { isAuthenticated, user, loading } = useAuth();

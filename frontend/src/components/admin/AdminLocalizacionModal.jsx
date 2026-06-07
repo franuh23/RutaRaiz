@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+// Modal de administración para crear o modificar hitos geográficos. Recibe las rutas disponibles,
+// los datos a editar (locEditando) y devuelve los campos formateados numéricamente al componente padre a través de onSave.
 
 export default function AdminLocalizacionModal({ isOpen, onClose, onSave, locEditando, rutas }) {
   const [form, setForm] = useState({
@@ -6,7 +8,7 @@ export default function AdminLocalizacionModal({ isOpen, onClose, onSave, locEdi
     nombre: '', 
     descripcion: '', 
     distancia_desde_inicio: '', 
-    distancia_desde_fin: '' // 👈 Añadido para que cuadre con tu BD
+    distancia_desde_fin: ''
   });
 
   useEffect(() => {
@@ -37,7 +39,6 @@ export default function AdminLocalizacionModal({ isOpen, onClose, onSave, locEdi
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Convertimos las distancias a números con decimales antes de enviarlas
     const dataToSend = {
       ...form,
       distancia_desde_inicio: parseFloat(form.distancia_desde_inicio),
@@ -73,7 +74,6 @@ export default function AdminLocalizacionModal({ isOpen, onClose, onSave, locEdi
                   <input type="text" name="nombre" className="form-control" value={form.nombre} onChange={handleChange} required style={{ borderRadius: 'var(--radius-md)' }} />
                 </div>
                 
-                {/* Nuevos campos de distancias lado a lado */}
                 <div className="col-12 col-sm-6">
                   <label className="form-label fw-semibold small">Km desde el inicio</label>
                   <input type="number" step="0.1" name="distancia_desde_inicio" className="form-control" value={form.distancia_desde_inicio} onChange={handleChange} required placeholder="Ej: 12.5" style={{ borderRadius: 'var(--radius-md)' }} />

@@ -1,14 +1,15 @@
 import React from 'react';
+// Fila de la tabla de rutas. 
+// Muestra datos de una ruta (puntos, km, dificultad) y conecta los botones de editar y borrar con onEditar y onEliminar.
 
 export default function AdminRutaRow({ ruta, onEditar, onEliminar }) {
   
-  // Helper adaptado a los valores string en minúscula del backend
   const getDificultadBadge = (dificultad) => {
     const diff = dificultad ? dificultad.toLowerCase() : 'media';
     switch (diff) {
       case 'baja': return 'bg-success-subtle text-success border border-success-subtle';
       case 'alta': return 'bg-danger-subtle text-danger border border-danger-subtle';
-      default: return 'bg-warning-subtle text-warning-emphasis border border-warning-subtle'; // media
+      default: return 'bg-warning-subtle text-warning-emphasis border border-warning-subtle';
     }
   };
 

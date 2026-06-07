@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import { apiFetch } from '../../services/api';
+// Tarjeta de itinerario personal.
 
 export default function PlanificacionCard({ p, onVer, onEliminar, onEmpezar, activandoId }) {
   const { token } = useAuth();
@@ -20,7 +21,7 @@ export default function PlanificacionCard({ p, onVer, onEliminar, onEmpezar, act
     localizacion_fin_nombre = 'Fin de trayecto',
     is_public = false,
     es_clonada = false,
-    en_curso = false // 🚀 Recibimos el booleano real de Neon
+    en_curso = false
   } = p || {};
 
   const [isPublic, setIsPublic] = useState(is_public);
@@ -146,8 +147,6 @@ export default function PlanificacionCard({ p, onVer, onEliminar, onEmpezar, act
         </div>
 
         <div className="col-12 col-md-6 d-flex justify-content-md-end align-items-center flex-wrap gap-2">
-
-          {/* 🚀 EL BOTÓN INTERACTIVO DE SEGUIMIENTO (Solo si se pasa la función onEmpezar) */}
           {onEmpezar && (
             en_curso ? (
               <Button variant="secondary" size="sm" className="px-3 fw-bold" style={{ fontSize: '11px', background: '#e8f5e9', color: '#2e7d32', border: 'none', cursor: 'default' }}>
@@ -167,7 +166,6 @@ export default function PlanificacionCard({ p, onVer, onEliminar, onEmpezar, act
             )
           )}
 
-          {/* Botón Compartir */}
           {es_clonada ? (
             <button className="btn btn-sm btn-light d-flex align-items-center gap-1 px-2" disabled style={{ borderRadius: 'var(--radius-md)', fontSize: '11px', fontWeight: '600', color: '#9e9e9e', cursor: 'not-allowed' }}>
               <i className="fa-solid fa-lock" style={{ color: '#b0bec5' }}></i>

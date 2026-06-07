@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+// Modal de administración para dar de alta o editar rutas.
+// Controla la visibilidad con isOpen, adapta el formulario usando los datos del objeto rutaEditando y envía el objeto JSON numéricamente normalizado al componente padre mediante la función onSave.
 
 export default function AdminRutaModal({ isOpen, onClose, onSave, rutaEditando }) {
   const [form, setForm] = useState({
@@ -7,7 +9,7 @@ export default function AdminRutaModal({ isOpen, onClose, onSave, rutaEditando }
     inicio: '',
     fin: '',
     kilometros: '',
-    dificultad: 'media', // Por defecto en minúsculas
+    dificultad: 'media',
     imagen: ''
   });
 
@@ -46,7 +48,7 @@ export default function AdminRutaModal({ isOpen, onClose, onSave, rutaEditando }
     const dataToSend = {
       ...form,
       kilometros: parseFloat(form.kilometros),
-      dificultad: form.dificultad.toLowerCase() // Asegura minúsculas obligatorias para Laravel
+      dificultad: form.dificultad.toLowerCase()
     };
     onSave(dataToSend);
   };

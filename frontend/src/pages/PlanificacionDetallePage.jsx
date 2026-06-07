@@ -5,6 +5,7 @@ import Container from '../components/layout/Container';
 import ResumenPlanificacion from '../components/planificacion/ResumenPlanificacion';
 import EtapaCard from '../components/planificacion/EtapaCard';
 import { apiFetch } from '../services/api';
+// Vista detallada del itinerario, delega en ResumenPlanifiacion y EtapaCard.
 
 export default function PlanificacionDetallePage() {
   const { id } = useParams();

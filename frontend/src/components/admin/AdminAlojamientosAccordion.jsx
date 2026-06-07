@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import AdminAlojamientoRow from './AdminAlojamientoRow';
+// Acordeón anidado de administración que agrupa e itera rutas, localizaciones y alojamientos (rutas, localizaciones, alojamientos).
+// Controla la apertura por niveles con estados locales y delega el renderizado de filas y acciones finales a AdminAlojamientoRow.
 
 export default function AdminAlojamientosAccordion({ rutas, localizaciones, alojamientos, onEditar, onEliminar }) {
   const [rutaAbierta, setRutaAbierta] = useState(null);
@@ -13,7 +15,7 @@ export default function AdminAlojamientosAccordion({ rutas, localizaciones, aloj
 
         return (
           <div key={ruta.id} className="card border shadow-sm" style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
-            {/* Nivel 1: Cabecera de Ruta */}
+            {/* Cabecera de Ruta */}
             <div 
               className="p-3 bg-white d-flex justify-content-between align-items-center"
               style={{ cursor: 'pointer' }}
@@ -26,7 +28,7 @@ export default function AdminAlojamientosAccordion({ rutas, localizaciones, aloj
               <span className="fw-bold text-muted">{isRutaOpen ? '🔼' : '🔽'}</span>
             </div>
 
-            {/* Nivel 2: Desplegable de Localizaciones dentro de la Ruta */}
+            {/* Desplegable de Localizaciones dentro de la Ruta */}
             {isRutaOpen && (
               <div className="card-body bg-light p-3 border-top d-flex flex-column gap-2">
                 {locsDeEstaRuta.length === 0 ? (
@@ -52,7 +54,7 @@ export default function AdminAlojamientosAccordion({ rutas, localizaciones, aloj
                           <span className="small">{isLocOpen ? '➖' : '➕'}</span>
                         </div>
 
-                        {/* Nivel 3: Tabla con los alojamientos del pueblo */}
+                        {/* Tabla con los alojamientos del pueblo */}
                         {isLocOpen && (
                           <div className="bg-light p-0">
                             {alojDeEstaLoc.length === 0 ? (
@@ -60,7 +62,6 @@ export default function AdminAlojamientosAccordion({ rutas, localizaciones, aloj
                             ) : (
                               <div className="table-responsive">
                                 <table className="table table-hover m-0 table-sm align-middle bg-white">
-                                  {/* 🔄 MODIFICADO: Cabecera sincronizada con las columnas reales */}
                                   <thead className="table-light text-uppercase x-small text-muted" style={{ fontSize: '0.75rem' }}>
                                     <tr>
                                       <th className="ps-3" style={{ width: '80px' }}>ID</th>

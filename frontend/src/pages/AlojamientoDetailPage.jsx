@@ -5,6 +5,7 @@ import Container from '../components/layout/Container';
 import AlojamientoFicha from '../components/alojamientos/AlojamientoFicha';
 import AlojamientoComentarios from '../components/alojamientos/AlojamientoComentarios';
 import { apiFetch } from '../services/api';
+// Página de detalle de alojamiento, delega en AlojamientoFicha y AlojamientoComentarios.
 
 export default function AlojamientoDetailPage() {
   const { id } = useParams();
@@ -74,7 +75,6 @@ export default function AlojamientoDetailPage() {
       const dataJson = await res.json();
 
       if (res.ok) {
-        // 🧼 Quitamos el comentario del estado en caliente para que desaparezca visualmente
         setAlojamiento(prev => ({
           ...prev,
           comentarios: (prev.comentarios || []).filter(c => c.id !== comentarioId)

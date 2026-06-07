@@ -1,12 +1,11 @@
 import React from 'react';
+// Tarjeta informativa del perfil del usuario.
 
 export default function PerfilInfo({ user }) {
-  // Avatar por defecto si no tiene una foto subida
   const avatarPorDefecto = `https://api.dicebear.com/7.x/initials/svg?seed=${user?.nick || 'Peregrino'}&backgroundType=gradientLinear&backgroundColor=4e6e58,2d4a34`;
 
   return (
     <div className="card shadow-sm border-0 p-4 h-100 text-center text-md-start" style={{ borderRadius: 'var(--radius-lg)' }}>
-      {/* Bloque visual del Avatar */}
       <div className="d-flex flex-column align-items-center mb-4 text-center">
         <img 
           src={user?.avatar_url || avatarPorDefecto} 

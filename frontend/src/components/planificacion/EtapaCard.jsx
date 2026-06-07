@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
+// Tarjeta desplegable de etapa.
 
 export default function EtapaCard({ etapa }) {
   const [isOpen, setIsOpen] = useState(false);

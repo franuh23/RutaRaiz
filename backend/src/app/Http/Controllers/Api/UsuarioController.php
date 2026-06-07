@@ -10,15 +10,16 @@ use Illuminate\Support\Facades\Auth;
 class UsuarioController extends Controller
 {
     /**
-     * Listar todos los usuarios del sistema.
+     * List all users in the system.
      */
     public function index()
     {
+        // Verificar permisos de administrador
         if (Auth::user()->rol !== 'admin') {
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
-        // Devolvemos todos los usuarios ordenados por id
+        // Obtener todos los usuarios ordenados por ID
         $usuarios = Usuario::orderBy('id', 'asc')->get();
 
         return response()->json([
@@ -28,17 +29,18 @@ class UsuarioController extends Controller
     }
 
     /**
-     * Actualizar el rol o el estado activo de un usuario.
+     * Update a user's role or active status.
      */
     public function update(Request $request, string $id)
     {
+        // Verificar permisos de administrador
         if (Auth::user()->rol !== 'admin') {
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
         $usuario = Usuario::findOrFail($id);
 
-        // Evitar que el propio admin se desactive o se quite el rol a sí mismo
+        // Evitar que el administrador se modifique a sí mismo
         if (Auth::user()->id == $usuario->id) {
             return response()->json(['message' => 'No puedes modificar tus propios permisos de administrador.'], 400);
         }
@@ -57,16 +59,18 @@ class UsuarioController extends Controller
     }
 
     /**
-     * Eliminar un usuario permanentemente.
+     * Permanently delete a user.
      */
     public function destroy(string $id)
     {
+        // Verificar permisos de administrador
         if (Auth::user()->rol !== 'admin') {
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
         $usuario = Usuario::findOrFail($id);
 
+        // Evitar que el administrador se elimine a sí mismo
         if (Auth::user()->id == $usuario->id) {
             return response()->json(['message' => 'No puedes eliminar tu propia cuenta de administrador.'], 400);
         }

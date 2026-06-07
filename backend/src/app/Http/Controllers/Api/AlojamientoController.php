@@ -24,13 +24,12 @@ class AlojamientoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(AlojamientoPost $request) // 🔌 Conectado Form Request oficial
+    public function store(AlojamientoPost $request)
     {
         if (Auth::user()->rol !== 'admin') {
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
-        // Creamos usando estrictamente el array validado de campos reales
         $alojamiento = Alojamiento::create($request->validated());
 
         return response()->json([
@@ -44,7 +43,7 @@ class AlojamientoController extends Controller
      */
     public function show(string $id)
     {
-        // Cargamos el alojamiento trayendo SOLO los comentarios que sigan activos
+        // Cargamos el alojamiento trayendo solo los comentarios activos
         $alojamiento = Alojamiento::with([
             'comentarios' => function ($query) {
                 $query->where('activo', true)->orderBy('created_at', 'desc')->with('usuario');
@@ -57,7 +56,7 @@ class AlojamientoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(AlojamientoPut $request, string $id) // 🔌 Conectado Form Request oficial
+    public function update(AlojamientoPut $request, string $id)
     {
         if (Auth::user()->rol !== 'admin') {
             return response()->json(['message' => 'No autorizado'], 403);

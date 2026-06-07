@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { apiFetch } from '../../services/api';
+// Formulario de registro.
+// Envía los datos del nuevo usuario a /api/register mediante apiFetch, almacena el token, inicia sesión con useAuth y redirige con useNavigate.
 
 export default function RegisterForm() {
   const { login } = useAuth();
@@ -30,17 +32,16 @@ export default function RegisterForm() {
     try {
       const response = await apiFetch('/api/register', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json', 
-          'Accept': 'application/json' 
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(form)
       });
-      
+
       const data = await response.json();
 
       if (!response.ok) {
-        // ✨ MODO PRO: Si Laravel devuelve errores de validación específicos, los unificamos limpiamente
         const msgs = data.errors
           ? Object.values(data.errors).flat().join(' ')
           : data.message || 'Error al procesar el registro.';
@@ -92,7 +93,6 @@ export default function RegisterForm() {
               placeholder={placeholder}
               style={{ borderRadius: 'var(--radius-md)', padding: '0.65rem' }}
             />
-            {/* 💡 AVISO VISUAL DE SEGURIDAD EN EL CAMPO CONTRASEÑA */}
             {name === 'password' && (
               <div className="form-text text-muted" style={{ fontSize: '0.78rem', lineHeight: '1.3' }}>
                 Requisito: Mínimo 8 caracteres, incluyendo letras, números y algún símbolo especial (ej. @, #, $, *, !).
@@ -101,12 +101,12 @@ export default function RegisterForm() {
           </div>
         ))}
 
-        <button 
-          type="submit" 
-          className="btn w-100 text-white fw-bold py-2 mt-2" 
+        <button
+          type="submit"
+          className="btn w-100 text-white fw-bold py-2 mt-2"
           disabled={loading}
-          style={{ 
-            background: 'var(--verde-bosque)', 
+          style={{
+            background: 'var(--verde-bosque)',
             borderRadius: 'var(--radius-md)',
             transition: 'var(--transition)'
           }}
